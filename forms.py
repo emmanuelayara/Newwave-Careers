@@ -2,6 +2,17 @@ from flask_wtf import FlaskForm  # Flask-WTF for form handling
 from wtforms import StringField, PasswordField, SubmitField  # Form fields
 from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError  # Validators
 from models import User  # Import User model
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import DataRequired, Email
+
+
+
+class LoginForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Login')
+
 
 class RegistrationForm(FlaskForm):
     username = StringField('Username', 
