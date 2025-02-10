@@ -8,7 +8,9 @@ app = Flask(__name__)
 
 
 # Secret key for session management and CSRF protection
-app.config['SECRET_KEY'] = 'newwavecareers'  # Replace with a strong secret key
+app.config['SECRET_KEY'] = 'new_wave_careers'  # Replace with a strong secret key
+
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # Database configuration (using SQLite for simplicity)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///newwave.db'

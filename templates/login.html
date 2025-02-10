@@ -13,14 +13,19 @@
         {% endif %}
     {% endwith %}
 
-    <form method="POST">
-        <label>Email:</label>
-        <input type="email" name="email" required><br><br>
-
-        <label>Password:</label>
-        <input type="password" name="password" required><br><br>
-
-        <button type="submit">Login</button>
+    <form method="POST" action="{{ url_for('login') }}">
+        {{ form.hidden_tag() }}  <!-- Important for CSRF protection -->
+        
+        <label for="username">{{ form.username.label }}</label>
+        {{ form.username(class="form-control") }}
+    
+        <label for="password">{{ form.password.label }}</label>
+        {{ form.password(class="form-control") }}
+    
+        {{ form.submit(class="btn btn-primary") }}
     </form>
+    
+    
 </body>
 </html>
+

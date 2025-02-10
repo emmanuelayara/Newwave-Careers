@@ -1,15 +1,19 @@
-from flask import render_template, url_for, flash, redirect  # Flask utilities
+from flask import render_template, url_for, flash, redirect, session  # Flask utilities
 from app import app, db, bcrypt  # Import app, database, and bcrypt
 from models import User  # Import User model
 from flask_bcrypt import check_password_hash  # Import bcrypt check function
 from forms import RegistrationForm  # Import RegistrationForm
 from flask_login import login_user  # For logging in users
 from flask import render_template
-from flask import render_template, request, redirect, url_for, flash, session
+from flask import render_template, redirect
 from werkzeug.security import check_password_hash
 from app import app, db
+from flask import Flask, render_template, request, redirect, url_for, flash, session
+from models import User  # Import your User model
+from app import app, db, bcrypt  # Import necessary modules
+from werkzeug.security import check_password_hash
 from models import User  # Import the User model
-from forms import LoginForm  # ✅ Add this line
+from forms import LoginForm  # Add this line
 
 
 @app.route("/")
@@ -33,22 +37,26 @@ def register():
     return render_template('register.html', title='Register', form=form)  # Render the registration page
 
 
-@app.route('/login', methods=['GET', 'POST'])
+@app.route("/login", methods=['GET', 'POST'])
 def login():
-    form = LoginForm()  # Assuming you're using a login form
+    form = LoginForm()  # Make sure this exists in your forms.py
 
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()  # Find user by email
+    if request.method == 'POST' and form.validate_on_submit():
+        username = form.username.data
+        password = form.password.data
 
-        if user and bcrypt.check_password_hash(user.password, form.password.data):  # ✅ Check hashed password
-            session['user_id'] = user.id
+        user = User.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
+            session['user_id'] = user.id  # Store user in session
             flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
-
         else:
-            flash('Invalid email or password.', 'danger')
+            flash('Invalid username or password', 'danger')
 
-    return render_template('login.html', title='Login', form=form)
+    return render_template('login.html', form=form)  # Pass form to the template
+
+
 
 
 @app.route('/dashboard')
