@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <h2>Post a New Job</h2>
+    <form method="POST">
+        <label>Title:</label>
+        <input type="text" name="title" required>
+
+        <label>Description:</label>
+        <textarea name="description" required></textarea>
+
+        <label>Company:</label>
+        <input type="text" name="company" required>
+
+        <label>Location:</label>
+        <input type="text" name="location" required>
+
+        <button type="submit">Post Job</button>
+    </form>
+{% endblock %}

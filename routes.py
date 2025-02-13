@@ -12,6 +12,8 @@ from models import User  # Import the User model
 from forms import LoginForm  # ✅ Add this line
 from flask_login import login_required, current_user
 from flask_login import logout_user
+from models import Job  # Ensure Job is imported
+from models import Application  # Ensure Application is imported
 
 
 
@@ -54,11 +56,56 @@ def login():
 
     return render_template('login.html', title='Login', form=form)
 
-    
-@app.route('/dashboard')
+
+@app.route("/post-job", methods=['GET', 'POST'])
 @login_required
+def post_job():
+    if request.method == 'POST':
+        title = request.form.get('title')
+        description = request.form.get('description')
+        company = request.form.get('company')
+        location = request.form.get('location')
+
+        new_job = Job(title=title, description=description, company=company, location=location)
+        db.session.add(new_job)
+        db.session.commit()
+        
+        flash('Job posted successfully!', 'success')
+        return redirect(url_for('dashboard'))
+
+    return render_template('post_job.html')
+
+
+@app.route("/apply/<int:job_id>", methods=['GET', 'POST'])
+@login_required
+def apply(job_id):
+    job = Job.query.get_or_404(job_id)
+
+    if request.method == 'POST':
+        cover_letter = request.form.get('cover_letter')
+
+        new_application = Application(job_id=job.id, user_id=current_user.id, cover_letter=cover_letter)
+        db.session.add(new_application)
+        db.session.commit()
+        
+        flash('Application submitted successfully!', 'success')
+        return redirect(url_for('jobs'))
+
+    return render_template('apply.html', job=job)
+
+
+
+@app.route("/jobs")
+def jobs():
+    job_list = Job.query.all()
+    return render_template('jobs.html', jobs=job_list)
+
+
+
+@app.route("/dashboard")
+@login_required  # Ensures only logged-in users can access it
 def dashboard():
-    return f"Welcome to your dashboard, {current_user.username}!"
+    return render_template('dashboard.html', user=current_user)
 
 
 @app.route('/logout')
