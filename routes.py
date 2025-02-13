@@ -14,6 +14,8 @@ from flask_login import login_required, current_user
 from flask_login import logout_user
 from models import Job  # Ensure Job is imported
 from models import Application  # Ensure Application is imported
+from flask_login import login_required, current_user
+from flask import render_template, redirect, url_for, flash
 
 
 
@@ -93,6 +95,44 @@ def apply(job_id):
 
     return render_template('apply.html', job=job)
 
+
+@app.route('/admin')
+@login_required
+def admin_dashboard():
+    if not current_user.is_admin:
+        flash("Access denied. Admins only.", "danger")
+        return redirect(url_for('dashboard'))
+
+    users = User.query.all()
+    jobs = Job.query.all()
+    return render_template('admin.html', users=users, jobs=jobs)
+
+
+@app.route('/admin/delete_user/<int:user_id>')
+@login_required
+def delete_user(user_id):
+    if not current_user.is_admin:
+        flash("Access denied. Admins only.", "danger")
+        return redirect(url_for('admin_dashboard'))
+
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash("User deleted successfully.", "success")
+    return redirect(url_for('admin_dashboard'))
+
+@app.route('/admin/delete_job/<int:job_id>')
+@login_required
+def delete_job(job_id):
+    if not current_user.is_admin:
+        flash("Access denied. Admins only.", "danger")
+        return redirect(url_for('admin_dashboard'))
+
+    job = Job.query.get_or_404(job_id)
+    db.session.delete(job)
+    db.session.commit()
+    flash("Job deleted successfully.", "success")
+    return redirect(url_for('admin_dashboard'))
 
 
 @app.route("/jobs")

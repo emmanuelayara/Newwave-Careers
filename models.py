@@ -14,6 +14,7 @@ class User(db.Model, UserMixin):
     username = db.Column(db.String(50), unique=True, nullable=False)  # User's unique name
     email = db.Column(db.String(100), unique=True, nullable=False)  # User's unique email
     password = db.Column(db.String(60), nullable=False)  # Hashed password
+    is_admin = db.Column(db.Boolean, default=False)  # Admin flag
     date_created = db.Column(db.DateTime, default=datetime.utcnow)  # Timestamp for user creation
 
     def __repr__(self):
