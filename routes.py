@@ -10,6 +10,9 @@ from werkzeug.security import check_password_hash
 from app import app, db
 from models import User  # Import the User model
 from forms import LoginForm  # ✅ Add this line
+from flask_login import login_required, current_user
+from flask_login import logout_user
+
 
 
 @app.route("/")
@@ -40,8 +43,9 @@ def login():
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()  # Find user by email
 
-        if user and bcrypt.check_password_hash(user.password, form.password.data):  # ✅ Check hashed password
-            session['user_id'] = user.id
+        if user and bcrypt.check_password_hash(user.password, form.password.data):
+            login_user(user)  # This properly logs in the user
+
             flash('Login successful!', 'success')
             return redirect(url_for('dashboard'))
 
@@ -50,12 +54,16 @@ def login():
 
     return render_template('login.html', title='Login', form=form)
 
-
-@app.route('/dashboard')
-def dashboard():
-    if 'user_id' not in session:
-        flash('You need to login first.', 'warning')
-        return redirect(url_for('login'))
     
-    return f"Welcome to your dashboard, {session['user_email']}!"
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    return f"Welcome to your dashboard, {current_user.username}!"
 
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('login'))
