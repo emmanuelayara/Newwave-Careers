@@ -16,6 +16,11 @@ from models import Job  # Ensure Job is imported
 from models import Application  # Ensure Application is imported
 from flask_login import login_required, current_user
 from flask import render_template, redirect, url_for, flash
+from flask import make_response
+import io
+from flask import Response
+from reportlab.lib.pagesizes import letter
+from reportlab.pdfgen import canvas
 
 
 
@@ -146,6 +151,163 @@ def jobs():
 @login_required  # Ensures only logged-in users can access it
 def dashboard():
     return render_template('dashboard.html', user=current_user)
+
+from flask import render_template, redirect, url_for, flash
+from flask_login import login_required, current_user
+from app import app, db
+from models import Resume
+from forms import ResumeForm
+
+@app.route("/resume", methods=["GET", "POST"])
+@login_required
+def resume():
+    form = ResumeForm()
+    resume = Resume.query.filter_by(user_id=current_user.id).first()
+    
+    if resume:
+        form.full_name.data = resume.full_name
+        form.phone.data = resume.phone
+        form.email.data = resume.email
+        form.education.data = resume.education
+        form.experience.data = resume.experience
+        form.skills.data = resume.skills
+        form.summary.data = resume.summary
+        form.Awards_and_honors.data = resume.Awards_and_honors
+
+    if form.validate_on_submit():
+        if resume:
+            # Update existing resume
+            resume.full_name = form.full_name.data
+            resume.phone = form.phone.data
+            resume.email = form.email.data
+            resume.education = form.education.data
+            resume.experience = form.experience.data
+            resume.skills = form.skills.data
+            resume.summary = form.summary.data
+            resume.Awards_and_honors = form.Awards_and_honors.data
+        else:
+            # Create new resume
+            new_resume = Resume(
+                user_id=current_user.id,
+                full_name=form.full_name.data,
+                phone=form.phone.data,
+                email=form.email.data,
+                education=form.education.data,
+                experience=form.experience.data,
+                skills=form.skills.data,
+                summary=form.summary.data,
+                Awards_and_honors=form.Awards_and_honors.data
+            )
+            db.session.add(new_resume)
+
+        db.session.commit()
+        flash("Resume saved successfully!", "success")
+        return redirect(url_for("resume"))
+
+    return render_template("resume.html", form=form)
+
+
+@app.route("/resume/preview")
+@login_required
+def resume_preview():
+    # Get the current user's resume
+    resume = Resume.query.filter_by(user_id=current_user.id).first()
+    if not resume:
+        flash("You have not created a resume yet.", "warning")
+        return redirect(url_for("resume"))
+    
+    # Render a template to preview the resume
+    return render_template("resume_preview.html", resume=resume)
+
+
+@app.route("/resume/download")
+@login_required
+def resume_download():
+    # Retrieve the current user's resume
+    resume = Resume.query.filter_by(user_id=current_user.id).first()
+    if not resume:
+        flash("You have not created a resume yet.", "warning")
+        return redirect(url_for("resume"))
+
+    # Create a BytesIO buffer to hold the PDF data
+    buffer = io.BytesIO()
+    pdf = canvas.Canvas(buffer, pagesize=letter)
+    width, height = letter
+
+    # Set some starting positions
+    y = height - 50
+    left_margin = 50
+
+    # Title / Header
+    pdf.setFont("Helvetica-Bold", 16)
+    pdf.drawString(left_margin, y, f"Resume: {resume.full_name}")
+    y -= 30
+
+    # Contact Details
+    pdf.setFont("Helvetica", 12)
+    pdf.drawString(left_margin, y, f"Email: {resume.email}")
+    y -= 20
+    pdf.drawString(left_margin, y, f"Phone: {resume.phone}")
+    y -= 30
+
+    # Professional Summary
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(left_margin, y, "Professional Summary:")
+    y -= 20
+    pdf.setFont("Helvetica", 12)
+    for line in resume.summary.split('\n'):
+        pdf.drawString(left_margin, y, line)
+        y -= 15
+    y -= 10
+
+        # Awards and honors
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(left_margin, y, "Professional Summary:")
+    y -= 20
+    pdf.setFont("Helvetica", 12)
+    for line in resume.Awards_and_honors.split('\n'):
+        pdf.drawString(left_margin, y, line)
+        y -= 15
+    y -= 10
+
+    # Education
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(left_margin, y, "Education:")
+    y -= 20
+    pdf.setFont("Helvetica", 12)
+    for line in resume.education.split('\n'):
+        pdf.drawString(left_margin, y, line)
+        y -= 15
+    y -= 10
+
+    # Work Experience
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(left_margin, y, "Experience:")
+    y -= 20
+    pdf.setFont("Helvetica", 12)
+    for line in resume.experience.split('\n'):
+        pdf.drawString(left_margin, y, line)
+        y -= 15
+    y -= 10
+
+    # Skills
+    pdf.setFont("Helvetica-Bold", 14)
+    pdf.drawString(left_margin, y, "Skills:")
+    y -= 20
+    pdf.setFont("Helvetica", 12)
+    for line in resume.skills.split('\n'):
+        pdf.drawString(left_margin, y, line)
+        y -= 15
+
+    pdf.showPage()
+    pdf.save()
+
+    # Move the buffer position to the beginning
+    buffer.seek(0)
+    
+    return Response(buffer, mimetype='application/pdf',
+                    headers={"Content-Disposition": "attachment; filename=resume.pdf"})
+
 
 
 @app.route('/logout')

@@ -41,3 +41,18 @@ class Application(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     cover_letter = db.Column(db.Text, nullable=False)
     date_applied = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+class Resume(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"), nullable=False)
+    full_name = db.Column(db.String(150), nullable=False)
+    phone = db.Column(db.String(20), nullable=False)
+    email = db.Column(db.String(150), nullable=False)
+    education = db.Column(db.Text, nullable=False)
+    experience = db.Column(db.Text, nullable=False)
+    skills = db.Column(db.Text, nullable=False)
+    summary = db.Column(db.Text, nullable=True)
+    Awards_and_honors = db.Column(db.Text, nullable=True)
+    
+    user = db.relationship("User", backref="resume", uselist=False)

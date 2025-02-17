@@ -5,7 +5,9 @@ from models import User  # Import User model
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import DataRequired, Email
-
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField
+from wtforms.validators import DataRequired, Email
 
 
 class LoginForm(FlaskForm):
@@ -40,3 +42,15 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError('An account with this email already exists.')
+
+
+class ResumeForm(FlaskForm):
+    full_name = StringField("Full Name", validators=[DataRequired()])
+    phone = StringField("Phone Number", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired(), Email()])
+    education = TextAreaField("Education", validators=[DataRequired()])
+    experience = TextAreaField("Work Experience", validators=[DataRequired()])
+    skills = TextAreaField("Skills", validators=[DataRequired()])
+    summary = TextAreaField("Professional Summary")
+    Awards_and_honors = TextAreaField("Awards and Honors")
+    submit = SubmitField("Save Resume")

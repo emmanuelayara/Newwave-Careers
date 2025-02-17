@@ -1,9 +1,17 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <h1>Welcome, {{ user.username }}!</h1>
-    <p>Email: {{ user.email }}</p>
-    <p>This is your personalized dashboard.</p>
-    
-    <a href="{{ url_for('logout') }}">Logout</a>
+  <h1>Welcome, {{ current_user.username }}!</h1>
+  <p>Email: {{ current_user.email }}</p>
+
+  <h3>Your Resume</h3>
+  {% if current_user.resume %}
+    <p>Your resume is ready. Use the buttons below to manage it:</p>
+    <p><a href="{{ url_for('resume') }}" class="btn btn-primary">Edit Resume</a></p>
+    <p><a href="{{ url_for('resume_preview') }}" class="btn btn-info">Preview Resume</a></p>
+    <p><a href="{{ url_for('resume_download') }}" class="btn btn-success">Download Resume</a></p>
+  {% else %}
+    <p>You haven't created a resume yet.</p>
+    <a href="{{ url_for('resume') }}" class="btn btn-primary">Create Resume</a>
+  {% endif %}
 {% endblock %}
