@@ -1,69 +1,68 @@
 {% extends "layout.html" %}
-
+{% block title %}Dashboard - NewWave Careers{% endblock %}
 {% block content %}
-<div class="container">
-  <h1>Welcome, {{ current_user.username }}!</h1>
-
-  <!-- Profile Summary Section -->
-  <div class="profile-summary">
-    <h3>Your Profile</h3>
-    <img src="{{ url_for('static', filename='profile_pics/' ~ current_user.profile_image) }}" alt="Profile Picture" width="150">
-    <p><strong>Email:</strong> {{ current_user.email }}</p>
-    <p><strong>Location:</strong> {{ current_user.location }}</p>
-    <p><strong>Bio:</strong> {{ current_user.bio or "No bio available." }}</p>
-    <a href="{{ url_for('profile') }}" class="btn btn-primary">Edit Profile</a>
+<div class="row">
+  <div class="col-md-4">
+    <!-- Profile Card -->
+    <div class="card mb-3">
+      <img src="{{ url_for('static', filename='profile_pics/' ~ current_user.profile_image) }}" class="card-img-top" alt="Profile Picture">
+      <div class="card-body">
+        <h5 class="card-title">{{ current_user.username }}</h5>
+        <p class="card-text"><strong>Email:</strong> {{ current_user.email }}</p>
+        <p class="card-text"><strong>Location:</strong> {{ current_user.location or 'N/A' }}</p>
+        <a href="{{ url_for('profile') }}" class="btn btn-primary btn-block">Edit Profile</a>
+      </div>
+    </div>
   </div>
-
-  <hr>
-
-  <!-- Application History Section -->
-  <div class="application-history">
-    <h3>Application History</h3>
-    {% if current_user.applications %}
-      <ul>
-        {% for application in current_user.applications %}
-          <li>
-            Job: {{ application.job.title }} at {{ application.job.company }}<br>
-            Applied on: {{ application.date_applied.strftime("%Y-%m-%d") }}
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>You have not applied for any jobs yet.</p>
-    {% endif %}
-  </div>
-
-  <hr>
-
-  <!-- Saved Jobs Section -->
-  <div class="saved-jobs">
-    <h3>Saved Jobs</h3>
-    {% if current_user.saved_jobs.count() > 0 %}
-      <ul>
-        {% for job in current_user.saved_jobs %}
-          <li>
-            <a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a> at {{ job.company }}
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>You have not saved any jobs.</p>
-    {% endif %}
-  </div>
-
-  <hr>
-
-  <!-- Resume Actions -->
-  <div class="resume-actions">
-    <h3>Your Resume</h3>
-    {% if current_user.resume %}
-      <a href="{{ url_for('resume') }}" class="btn btn-primary">Edit Resume</a>
-      <a href="{{ url_for('resume_preview') }}" class="btn btn-info">Preview Resume</a>
-      <a href="{{ url_for('resume_download') }}" class="btn btn-success">Download Resume</a>
-    {% else %}
-      <p>You haven't created a resume yet.</p>
-      <a href="{{ url_for('resume') }}" class="btn btn-primary">Create Resume</a>
-    {% endif %}
+  <div class="col-md-8">
+    <!-- Resume & Other Data -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4 class="card-title">Your Resume</h4>
+        {% if current_user.resume %}
+          <p>Your resume is complete.</p>
+          <a href="{{ url_for('resume') }}" class="btn btn-primary">Edit Resume</a>
+          <a href="{{ url_for('resume_preview') }}" class="btn btn-info">Preview Resume</a>
+          <a href="{{ url_for('resume_download') }}" class="btn btn-success">Download Resume</a>
+        {% else %}
+          <p>You haven't created a resume yet.</p>
+          <a href="{{ url_for('resume') }}" class="btn btn-primary">Create Resume</a>
+        {% endif %}
+      </div>
+    </div>
+    <!-- Application History & Saved Jobs -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <h4 class="card-title">Application History</h4>
+        {% if current_user.applications %}
+          <ul class="list-group">
+            {% for app in current_user.applications %}
+              <li class="list-group-item">
+                <strong>{{ app.job.title }}</strong> at {{ app.job.company }} on {{ app.date_applied.strftime("%Y-%m-%d") }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>No applications found.</p>
+        {% endif %}
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <h4 class="card-title">Saved Jobs</h4>
+        {% if current_user.saved_jobs.count() > 0 %}
+          <ul class="list-group">
+            {% for job in current_user.saved_jobs %}
+              <li class="list-group-item">
+                <a href="{{ url_for('job_detail', job_id=job.id) }}">{{ job.title }}</a> at {{ job.company }}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>You haven't saved any jobs yet.</p>
+        {% endif %}
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

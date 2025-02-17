@@ -56,3 +56,53 @@ footer {
     background: #333;
     color: white;
 }
+
+/* Define Dark Blue Color Palette */
+:root {
+    --main-blue: #003366;    /* Darker blue */
+    --light-blue: #336699;   /* Slightly lighter accent */
+    --dark-blue: #002244;    /* Even darker for hover effects */
+  }
+  
+  /* Override Bootstrap's primary color for navbar and footer */
+  .navbar.bg-primary, .footer.bg-primary {
+    background-color: var(--main-blue) !important;
+  }
+  
+  /* Buttons */
+  .btn-primary {
+    background-color: var(--main-blue);
+    border-color: var(--dark-blue);
+  }
+  
+  .btn-primary:hover {
+    background-color: var(--dark-blue);
+  }
+  
+  /* Body background and text */
+  body {
+    background-color: #f8f9fa;
+    color: #333;
+  }
+  
+  /* Container styling */
+  .container {
+    margin-top: 20px;
+  }
+  
+  /* Custom styling for job listing cards */
+  .job-listing {
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+  }
+  
+  /* Footer styling */
+  .footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+  }
+  
