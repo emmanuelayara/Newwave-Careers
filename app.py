@@ -3,9 +3,11 @@ from flask_sqlalchemy import SQLAlchemy  # ORM for database interactions
 from flask_bcrypt import Bcrypt  # For hashing passwords
 from flask_login import LoginManager  # Manages user sessions
 from flask_migrate import Migrate
+import os
 
 app = Flask(__name__)
-
+app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static/profile_pics')
+app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
 # Secret key for session management and CSRF protection
 app.config['SECRET_KEY'] = 'newwavecareers'  # Replace with a strong secret key

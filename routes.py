@@ -21,6 +21,20 @@ import io
 from flask import Response
 from reportlab.lib.pagesizes import letter
 from reportlab.pdfgen import canvas
+from flask import render_template, redirect, url_for, flash, request
+from flask_login import login_required, current_user
+from app import app, db
+from forms import ProfileForm
+import os
+from flask import render_template, redirect, url_for, flash, request
+from flask_login import login_required, current_user
+from app import app, db
+from forms import ProfileForm
+from werkzeug.utils import secure_filename
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
+
 
 
 
@@ -62,6 +76,46 @@ def login():
             flash('Invalid email or password.', 'danger')
 
     return render_template('login.html', title='Login', form=form)
+
+
+
+@app.route('/profile', methods=['GET', 'POST'])
+@login_required
+def profile():
+    form = ProfileForm()
+    
+    if form.validate_on_submit():
+        # Update text fields
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        current_user.bio = form.bio.data
+        current_user.location = form.location.data
+        
+        # Handle profile image upload if provided
+        if form.profile_image.data:
+            file = form.profile_image.data
+            if file and allowed_file(file.filename):
+                # Create a secure filename
+                filename = secure_filename(file.filename)
+                # Optionally, prepend user id or username to the filename to avoid collisions
+                filename = f"user_{current_user.id}_{filename}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                # Save the filename in the database (relative path)
+                current_user.profile_image = filename
+
+        db.session.commit()
+        flash('Your profile has been updated!', 'success')
+        return redirect(url_for('dashboard'))  # Redirect to dashboard after updating profile
+    elif request.method == 'GET':
+        # Pre-populate form with current user data
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+        form.bio.data = current_user.bio
+        form.location.data = current_user.location
+
+    return render_template('profile.html', form=form)
+
 
 
 @app.route("/post-job", methods=['GET', 'POST'])

@@ -8,6 +8,12 @@ from wtforms.validators import DataRequired, Email
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Email
+from wtforms import StringField, TextAreaField, SubmitField
+from wtforms.validators import DataRequired, Email, Length
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField
+from flask_wtf.file import FileField, FileAllowed
+from wtforms.validators import DataRequired, Email, Length
 
 
 class LoginForm(FlaskForm):
@@ -54,3 +60,14 @@ class ResumeForm(FlaskForm):
     summary = TextAreaField("Professional Summary")
     Awards_and_honors = TextAreaField("Awards and Honors")
     submit = SubmitField("Save Resume")
+
+
+
+class ProfileForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=100)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    bio = TextAreaField('Bio')
+    location = StringField('Location')
+    profile_image = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'])])
+    submit = SubmitField('Update Profile')
+
