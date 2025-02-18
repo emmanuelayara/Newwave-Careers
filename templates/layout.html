@@ -7,7 +7,7 @@
   <!-- Bootstrap CSS (using CDN for simplicity) -->
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
   <!-- Custom CSS -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <link rel="stylesheet" href="static/style.css">
 </head>
 <body>
   <!-- Navigation -->
@@ -28,7 +28,7 @@
             <a class="nav-link" href="{{ url_for('jobs') }}">Jobs</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('resume') }}">Resume</a>
+            <a class="nav-link" href="{{ url_for('notifications') }}">Notifications</a>
           </li>
           {% if current_user.is_admin %}
           <li class="nav-item">
@@ -49,9 +49,6 @@
         Welcome, {{ current_user.username }}!
       </span>
       <ul class="navbar-nav ml-3">
-        <li class="nav-item">
-          <a class="nav-link" href="{{ url_for('profile') }}">Profile</a>
-        </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('logout') }}">Logout</a>
         </li>

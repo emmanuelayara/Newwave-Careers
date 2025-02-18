@@ -4,6 +4,10 @@
     <title>Login</title>
 </head>
 <body>
+    {% extends "layout.html" %}
+
+
+    {% block content %}
     <h2>Login</h2>
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
@@ -27,5 +31,7 @@
     </form>
 
     <a href="{{ url_for('register') }}">click here if you do not have an account</a>
+
+{% endblock %}
 </body>
 </html>

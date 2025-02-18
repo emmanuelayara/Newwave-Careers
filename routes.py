@@ -42,6 +42,9 @@ def allowed_file(filename):
 def home():
     return render_template("home.html", title="Home")
 
+@app.route("/notifications", methods=['GET', 'POST'])
+def notifications():
+    return render_template("notifications.html", title="Home")
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():

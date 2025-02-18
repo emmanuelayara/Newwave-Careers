@@ -6,6 +6,9 @@
     <title>Register</title>
 </head>
 <body>
+    {% extends "layout.html" %}
+
+    {% block content %}
     <h2>Sign Up</h2>
     <form method="POST">
         {{ form.hidden_tag() }}  <!-- CSRF token for security -->
@@ -33,5 +36,8 @@
         <p>{{ form.submit }}</p>
     </form>
     <a href="{{ url_for('login') }}">already have an account? Click here to login</a>
+
+    
+    {% endblock %}
 </body>
 </html>
