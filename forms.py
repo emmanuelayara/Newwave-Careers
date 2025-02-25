@@ -14,6 +14,10 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField
 from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import DataRequired, Email, Length
+from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField
+from wtforms.validators import DataRequired, Length
+
 
 
 class LoginForm(FlaskForm):
@@ -71,3 +75,11 @@ class ProfileForm(FlaskForm):
     profile_image = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'])])
     submit = SubmitField('Update Profile')
 
+
+
+class JobForm(FlaskForm):
+    title = StringField('Job Title', validators=[DataRequired(), Length(min=3, max=100)])
+    company = StringField('Company', validators=[DataRequired(), Length(min=2, max=100)])
+    location = StringField('Location', validators=[DataRequired(), Length(min=2, max=100)])
+    description = TextAreaField('Job Description', validators=[DataRequired(), Length(min=10)])
+    submit = SubmitField('Submit')

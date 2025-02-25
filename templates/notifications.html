@@ -1,1 +1,27 @@
 {% extends "layout.html" %}
+{% block title %}Notifications - Newwave{% endblock %}
+{% block content %}
+<div class="container">
+  <h2>Notifications</h2>
+  {% if notifications %}
+    <ul class="list-group">
+      {% for notification in notifications %}
+        <li class="list-group-item d-flex justify-content-between align-items-center {% if not notification.read %}font-weight-bold{% endif %}">
+          <div>
+            {{ notification.message }}
+            <small class="text-muted ml-2">{{ notification.timestamp.strftime("%Y-%m-%d %H:%M") }}</small>
+          </div>
+          <div>
+            {% if not notification.read %}
+              <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}" class="btn btn-sm btn-outline-success">Mark as read</a>
+            {% endif %}
+            <a href="{{ url_for('delete_notification', notification_id=notification.id) }}" class="btn btn-sm btn-outline-danger">Delete</a>
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No notifications.</p>
+  {% endif %}
+</div>
+{% endblock %}

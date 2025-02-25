@@ -30,6 +30,9 @@ from flask import render_template, redirect, url_for, flash, request
 from flask_login import login_required, current_user
 from app import app, db
 from forms import ProfileForm
+from flask import render_template, flash, redirect, url_for, abort
+from flask_login import login_required, current_user
+from models import Notification
 from werkzeug.utils import secure_filename
 
 def allowed_file(filename):
@@ -42,9 +45,41 @@ def allowed_file(filename):
 def home():
     return render_template("home.html", title="Home")
 
-@app.route("/notifications", methods=['GET', 'POST'])
+
+@app.route('/notifications')
+@login_required
 def notifications():
-    return render_template("notifications.html", title="Home")
+    # Retrieve all notifications for the current user, ordered by most recent
+    notifications = Notification.query.filter_by(user_id=current_user.id)\
+                                        .order_by(Notification.timestamp.desc())\
+                                        .all()
+    return render_template('notifications.html', notifications=notifications)
+
+
+@app.route('/notifications/read/<int:notification_id>')
+@login_required
+def mark_notification_read(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    # Ensure that the notification belongs to the current user
+    if notification.user_id != current_user.id:
+        abort(403)
+    notification.read = True
+    db.session.commit()
+    flash('Notification marked as read.', 'success')
+    return redirect(url_for('notifications'))
+
+
+@app.route('/notifications/delete/<int:notification_id>')
+@login_required
+def delete_notification(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    if notification.user_id != current_user.id:
+        abort(403)
+    db.session.delete(notification)
+    db.session.commit()
+    flash('Notification deleted.', 'success')
+    return redirect(url_for('notifications'))
+
 
 @app.route("/register", methods=['GET', 'POST'])
 def register():

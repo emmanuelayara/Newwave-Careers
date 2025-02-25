@@ -1,6 +1,8 @@
 from app import db, login_manager  # Import from our app instance
 from flask_login import UserMixin  # Provides default implementations for Flask-Login
 from datetime import datetime  # For timestamping user creation
+from app import db
+
 
 # User loader function for Flask-Login
 @login_manager.user_loader
@@ -40,6 +42,8 @@ class Job(db.Model):
     location = db.Column(db.String(100), nullable=False)
     date_posted = db.Column(db.DateTime, default=datetime.utcnow)
     applications = db.relationship('Application', backref='job', lazy=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
 
 
     def __repr__(self):
@@ -67,3 +71,17 @@ class Resume(db.Model):
     Awards_and_honors = db.Column(db.Text, nullable=True)
     
     user = db.relationship("User", backref="resume", uselist=False)
+
+
+class Notification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    message = db.Column(db.String(255), nullable=False)
+    read = db.Column(db.Boolean, default=False)
+    timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # Establish relationship (if not already defined in User model)
+    user = db.relationship('User', backref='notifications', lazy=True)
+
+    def __repr__(self):
+        return f"Notification('{self.message}', Read: {self.read})"
