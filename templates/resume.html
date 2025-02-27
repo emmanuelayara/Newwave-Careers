@@ -1,35 +1,56 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <h2>Create Your Resume</h2>
-    <form method="POST">
-        {{ form.hidden_tag() }}
-
-        <label>{{ form.full_name.label }}</label>
-        {{ form.full_name(class="form-control") }}
-
-        <label>{{ form.phone.label }}</label>
-        {{ form.phone(class="form-control") }}
-
-        <label>{{ form.email.label }}</label>
-        {{ form.email(class="form-control") }}
-
-        <label>{{ form.education.label }}</label>
-        {{ form.education(class="form-control") }}
-
-        <label>{{ form.experience.label }}</label>
-        {{ form.experience(class="form-control") }}
-
-        <label>{{ form.skills.label }}</label>
-        {{ form.skills(class="form-control") }}
-
-        <label>{{ form.summary.label }}</label>
-        {{ form.summary(class="form-control") }}
-
-        <label>{{ form.Awards_and_honors.label }}</label>
-        {{ form.Awards_and_honors(class="form-control") }}
-
-        <br>
-        <button type="submit" class="btn btn-primary">Save Resume</button>
-    </form>
+<div class="container mt-4">
+    <h2 class="mb-4">Create Your Resume</h2>
+    <div class="card shadow p-4">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            
+            <div class="mb-3">
+                {{ form.full_name.label(class="form-label") }}
+                {{ form.full_name(class="form-control") }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.phone.label(class="form-label") }}
+                {{ form.phone(class="form-control") }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.email.label(class="form-label") }}
+                {{ form.email(class="form-control") }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.education.label(class="form-label") }}
+                {{ form.education(class="form-control") }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.experience.label(class="form-label") }}
+                {{ form.experience(class="form-control") }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.skills.label(class="form-label") }}
+                {{ form.skills(class="form-control") }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.summary.label(class="form-label") }}
+                {{ form.summary(class="form-control") }}
+            </div>
+            
+            <div class="mb-3">
+                {{ form.Awards_and_honors.label(class="form-label") }}
+                {{ form.Awards_and_honors(class="form-control") }}
+            </div>
+            
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Save Resume</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
