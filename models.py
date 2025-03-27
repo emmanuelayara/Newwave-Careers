@@ -64,13 +64,31 @@ class Resume(db.Model):
     full_name = db.Column(db.String(150), nullable=False)
     phone = db.Column(db.String(20), nullable=False)
     email = db.Column(db.String(150), nullable=False)
-    education = db.Column(db.Text, nullable=False)
-    experience = db.Column(db.Text, nullable=False)
-    skills = db.Column(db.Text, nullable=False)
-    summary = db.Column(db.Text, nullable=True)
-    Awards_and_honors = db.Column(db.Text, nullable=True)
-    
+    profile_summary = db.Column(db.Text, nullable=True)  # Profile Summary
+    activities_interests = db.Column(db.Text, nullable=True)  # List of activities
+    key_skills = db.Column(db.Text, nullable=True)  # List of skills
+    education = db.relationship("Education", backref="resume", lazy=True, cascade="all, delete-orphan")  # Multiple entries
+    experience = db.relationship("WorkExperience", backref="resume", lazy=True, cascade="all, delete-orphan")  # Multiple entries
+
     user = db.relationship("User", backref="resume", uselist=False)
+
+class Education(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    resume_id = db.Column(db.Integer, db.ForeignKey("resume.id"), nullable=False)
+    degree = db.Column(db.String(200), nullable=False)
+    institution = db.Column(db.String(200), nullable=False)
+    year = db.Column(db.String(50), nullable=False)
+
+class WorkExperience(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    resume_id = db.Column(db.Integer, db.ForeignKey("resume.id"), nullable=False)
+    job_title = db.Column(db.String(200), nullable=False)
+    company = db.Column(db.String(200), nullable=False)
+    location = db.Column(db.String(200), nullable=True)
+    start_year = db.Column(db.String(50), nullable=False)
+    end_year = db.Column(db.String(50), nullable=True)
+    description = db.Column(db.Text, nullable=True)
+
 
 
 class Notification(db.Model):

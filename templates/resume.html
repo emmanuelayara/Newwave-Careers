@@ -1,56 +1,118 @@
 {% extends "layout.html" %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Create Your Resume</h2>
-    <div class="card shadow p-4">
-        <form method="POST">
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h2 class="text-center mb-4">Resume Form</h2>
+        <form method="POST" class="p-4 border rounded bg-light shadow-sm">
             {{ form.hidden_tag() }}
-            
-            <div class="mb-3">
-                {{ form.full_name.label(class="form-label") }}
-                {{ form.full_name(class="form-control") }}
+
+            <!-- Personal Information -->
+            <h4 class="mb-3">Personal Information</h4>
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.full_name.label }}</label>
+                    {{ form.full_name(class="form-control") }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">{{ form.phone.label }}</label>
+                    {{ form.phone(class="form-control") }}
+                </div>
             </div>
-            
             <div class="mb-3">
-                {{ form.phone.label(class="form-label") }}
-                {{ form.phone(class="form-control") }}
-            </div>
-            
-            <div class="mb-3">
-                {{ form.email.label(class="form-label") }}
+                <label class="form-label">{{ form.email.label }}</label>
                 {{ form.email(class="form-control") }}
             </div>
-            
+
+            <!-- Profile Summary & Skills -->
+            <h4 class="mb-3">Profile & Skills</h4>
             <div class="mb-3">
-                {{ form.education.label(class="form-label") }}
-                {{ form.education(class="form-control") }}
+                <label class="form-label">{{ form.profile_summary.label }}</label>
+                {{ form.profile_summary(class="form-control", rows=3) }}
             </div>
-            
             <div class="mb-3">
-                {{ form.experience.label(class="form-label") }}
-                {{ form.experience(class="form-control") }}
+                <label class="form-label">{{ form.key_skills.label }}</label>
+                {{ form.key_skills(class="form-control", rows=2) }}
             </div>
-            
             <div class="mb-3">
-                {{ form.skills.label(class="form-label") }}
-                {{ form.skills(class="form-control") }}
+                <label class="form-label">{{ form.activities_interests.label }}</label>
+                {{ form.activities_interests(class="form-control", rows=2) }}
             </div>
-            
-            <div class="mb-3">
-                {{ form.summary.label(class="form-label") }}
-                {{ form.summary(class="form-control") }}
+
+            <!-- Education -->
+            <h4 class="mb-3">Education</h4>
+            <div id="education-container">
+                {% for edu in form.education %}
+                    <div class="border p-3 mb-3 rounded bg-white">
+                        {{ edu.degree.label }} {{ edu.degree(class="form-control mb-2") }}
+                        {{ edu.institution.label }} {{ edu.institution(class="form-control mb-2") }}
+                        {{ edu.year.label }} {{ edu.year(class="form-control mb-2") }}
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this)">Remove</button>
+                    </div>
+                {% endfor %}
             </div>
-            
-            <div class="mb-3">
-                {{ form.Awards_and_honors.label(class="form-label") }}
-                {{ form.Awards_and_honors(class="form-control") }}
+            <button type="button" class="btn btn-primary btn-sm mb-3" onclick="addEducation()">Add Education</button>
+
+            <!-- Work Experience -->
+            <h4 class="mb-3">Work Experience</h4>
+            <div id="experience-container">
+                {% for exp in form.experience %}
+                    <div class="border p-3 mb-3 rounded bg-white">
+                        {{ exp.job_title.label }} {{ exp.job_title }}
+                        {{ exp.company.label }} {{ exp.company }} <br> <br>
+                        {{ exp.location.label }} {{ exp.location }} <br> <br>
+                        {{ exp.start_year.label }} {{ exp.start_year }} <br>
+                        {{ exp.end_year.label }} {{ exp.end_year }} <br>
+                        {{ exp.description.label }} {{ exp.description }} <br>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this)">Remove</button>
+                    </div>
+                {% endfor %}
             </div>
-            
-            <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Save Resume</button>
+            <button type="button" class="btn btn-primary btn-sm mb-3" onclick="addExperience()">Add Experience</button>
+
+            <!-- Submit Button -->
+            <div class="text-center">
+                {{ form.submit(class="btn btn-success") }}
             </div>
         </form>
     </div>
-</div>
+
+    <script>
+        function addEducation() {
+            let container = document.getElementById("education-container");
+            let newEntry = document.createElement("div");
+            newEntry.classList.add("border", "p-3", "mb-3", "rounded", "bg-white");
+            newEntry.innerHTML = `
+                <label>Degree:</label> <input type="text" class="form-control mb-2" name="education-0-degree" required>
+                <label>Institution:</label> <input type="text" class="form-control mb-2" name="education-0-institution" required>
+                <label>Year:</label> <input type="text" class="form-control mb-2" name="education-0-year" required>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this)">Remove</button>
+            `;
+            container.appendChild(newEntry);
+        }
+
+        function addExperience() {
+            let container = document.getElementById("experience-container");
+            let newEntry = document.createElement("div");
+            newEntry.classList.add("border", "p-3", "mb-3", "rounded", "bg-white");
+            newEntry.innerHTML = `
+                <label>Job Title:</label> <input type="text" class="form-control mb-2" name="experience-0-job_title" required>
+                <label>Company:</label> <input type="text" class="form-control mb-2" name="experience-0-company" required>
+                <label>Location:</label> <input type="text" class="form-control mb-2" name="experience-0-location">
+                <label>Start Year:</label> <input type="text" class="form-control mb-2" name="experience-0-start_year" required>
+                <label>End Year:</label> <input type="text" class="form-control mb-2" name="experience-0-end_year">
+                <label>Description:</label> <textarea class="form-control mb-2" name="experience-0-description"></textarea>
+                <button type="button" class="btn btn-danger btn-sm" onclick="removeEntry(this)">Remove</button>
+            `;
+            container.appendChild(newEntry);
+        }
+
+        function removeEntry(button) {
+            button.parentElement.remove();
+        }
+    </script>
+</body>
 {% endblock %}

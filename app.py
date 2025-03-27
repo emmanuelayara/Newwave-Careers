@@ -6,10 +6,18 @@ from flask_migrate import Migrate
 import os
 
 app = Flask(__name__)
+
+@app.after_request
+def add_header(response):
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response
+
+
 app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static/profile_pics')
 app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
 
 # Secret key for session management and CSRF protection
+WTF_CSRF_ENABLED = True
 app.config['SECRET_KEY'] = 'newwavecareers'  # Replace with a strong secret key
 
 # Database configuration (using SQLite for simplicity)

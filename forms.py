@@ -15,6 +15,9 @@ from wtforms import StringField, TextAreaField, SubmitField
 from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import DataRequired, Email, Length
 from flask_wtf import FlaskForm
+from wtforms import StringField, TextAreaField, SubmitField, FieldList, FormField
+from wtforms.validators import DataRequired
+from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Length
 
@@ -54,16 +57,32 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('An account with this email already exists.')
 
 
+class EducationForm(FlaskForm):
+    degree = StringField("Degree", validators=[DataRequired()])
+    institution = StringField("Institution", validators=[DataRequired()])
+    year = StringField("Year", validators=[DataRequired()])
+
+class WorkExperienceForm(FlaskForm):
+    job_title = StringField("Job Title", validators=[DataRequired()])
+    company = StringField("Company", validators=[DataRequired()])
+    location = StringField("Location")
+    start_year = StringField("Start Year", validators=[DataRequired()])
+    end_year = StringField("End Year (or 'Present')")
+    description = TextAreaField("Description")
+
 class ResumeForm(FlaskForm):
     full_name = StringField("Full Name", validators=[DataRequired()])
-    phone = StringField("Phone Number", validators=[DataRequired()])
-    email = StringField("Email", validators=[DataRequired(), Email()])
-    education = TextAreaField("Education", validators=[DataRequired()])
-    experience = TextAreaField("Work Experience", validators=[DataRequired()])
-    skills = TextAreaField("Skills", validators=[DataRequired()])
-    summary = TextAreaField("Professional Summary")
-    Awards_and_honors = TextAreaField("Awards and Honors")
+    phone = StringField("Phone", validators=[DataRequired()])
+    email = StringField("Email", validators=[DataRequired()])
+    profile_summary = TextAreaField("Profile Summary")
+    activities_interests = TextAreaField("Activities & Interests (Comma-separated)")
+    key_skills = TextAreaField("Key Skills (Comma-separated)")
+    
+    education = FieldList(FormField(EducationForm), min_entries=1)
+    experience = FieldList(FormField(WorkExperienceForm), min_entries=1)
+
     submit = SubmitField("Save Resume")
+
 
 
 

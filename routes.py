@@ -1,6 +1,22 @@
 from flask import render_template, url_for, flash, redirect  # Flask utilities
 from app import app, db, bcrypt  # Import app, database, and bcrypt
 from models import User  # Import User model
+from models import Education
+from models import WorkExperience
+from models import Resume
+import pdfkit
+from flask import render_template, Response
+from xhtml2pdf import pisa
+import io
+from flask import render_template, Response, flash, redirect, url_for
+from flask_login import login_required, current_user
+from models import Resume  # Ensure your Resume model is imported
+import io
+from flask import Response, flash, redirect, url_for
+from flask_login import login_required, current_user
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from forms import ResumeForm
 from flask_bcrypt import check_password_hash  # Import bcrypt check function
 from forms import RegistrationForm  # Import RegistrationForm
 from flask_login import login_user  # For logging in users
@@ -8,6 +24,11 @@ from flask import render_template
 from flask import render_template, request, redirect, url_for, flash, session
 from werkzeug.security import check_password_hash
 from app import app, db
+from flask import render_template, redirect, url_for, flash
+from flask_login import login_required, current_user
+from app import app, db
+from models import Resume
+from forms import ResumeForm
 from models import User  # Import the User model
 from forms import LoginForm  # ✅ Add this line
 from flask_login import login_required, current_user
@@ -244,58 +265,62 @@ def jobs():
 def dashboard():
     return render_template('dashboard.html', user=current_user)
 
-from flask import render_template, redirect, url_for, flash
-from flask_login import login_required, current_user
-from app import app, db
-from models import Resume
-from forms import ResumeForm
 
 @app.route("/resume", methods=["GET", "POST"])
-@login_required
 def resume():
     form = ResumeForm()
-    resume = Resume.query.filter_by(user_id=current_user.id).first()
     
-    if resume:
-        form.full_name.data = resume.full_name
-        form.phone.data = resume.phone
-        form.email.data = resume.email
-        form.education.data = resume.education
-        form.experience.data = resume.experience
-        form.skills.data = resume.skills
-        form.summary.data = resume.summary
-        form.Awards_and_honors.data = resume.Awards_and_honors
+    if request.method == "GET":
+        if not form.education.data:
+            form.education.append_entry()
+        if not form.experience.data:
+            form.experience.append_entry()
 
     if form.validate_on_submit():
-        if resume:
-            # Update existing resume
-            resume.full_name = form.full_name.data
-            resume.phone = form.phone.data
-            resume.email = form.email.data
-            resume.education = form.education.data
-            resume.experience = form.experience.data
-            resume.skills = form.skills.data
-            resume.summary = form.summary.data
-            resume.Awards_and_honors = form.Awards_and_honors.data
-        else:
-            # Create new resume
-            new_resume = Resume(
+        flash("Form validated successfully!", "info")
+    else:
+        print(form.errors)  # Add this line
+        if request.method == "POST":
+            resume = Resume(
                 user_id=current_user.id,
                 full_name=form.full_name.data,
                 phone=form.phone.data,
                 email=form.email.data,
-                education=form.education.data,
-                experience=form.experience.data,
-                skills=form.skills.data,
-                summary=form.summary.data,
-                Awards_and_honors=form.Awards_and_honors.data
+                profile_summary=form.profile_summary.data,
+                activities_interests=form.activities_interests.data,
+                key_skills=form.key_skills.data
             )
-            db.session.add(new_resume)
+            db.session.add(resume)
+            db.session.commit()
 
-        db.session.commit()
-        flash("Resume saved successfully!", "success")
-        return redirect(url_for("resume"))
+            # Add Education Entries
+            for edu in form.education.data:
+                education = Education(
+                    degree=edu["degree"],
+                    institution=edu["institution"],
+                    year=edu["year"],
+                    resume_id=resume.id
+                )
+                db.session.add(education)
 
+            # Add Work Experience Entries
+            for exp in form.experience.data:
+                experience = WorkExperience(
+                    job_title=exp["job_title"],
+                    company=exp["company"],
+                    location=exp["location"],
+                    start_year=exp["start_year"],
+                    end_year=exp["end_year"],
+                    description=exp["description"],
+                    resume_id=resume.id
+                )
+                db.session.add(experience)
+
+            db.session.commit()
+            flash("Resume saved successfully!", "success")
+           
+            return redirect(url_for("resume_preview"))
+    
     return render_template("resume.html", form=form)
 
 
@@ -303,13 +328,16 @@ def resume():
 @login_required
 def resume_preview():
     # Get the current user's resume
-    resume = Resume.query.filter_by(user_id=current_user.id).first()
+    resume = Resume.query.filter_by(user_id=current_user.id).order_by(Resume.id.desc()).first()
     if not resume:
         flash("You have not created a resume yet.", "warning")
         return redirect(url_for("resume"))
     
-    # Render a template to preview the resume
-    return render_template("resume_preview.html", resume=resume)
+    education = Education.query.filter_by(resume_id=resume.id).all()
+    experience = WorkExperience.query.filter_by(resume_id=resume.id).all()
+
+    return render_template("resume_preview.html", resume=resume, education=education, experience=experience)
+
 
 
 @app.route("/resume/download")
@@ -321,84 +349,26 @@ def resume_download():
         flash("You have not created a resume yet.", "warning")
         return redirect(url_for("resume"))
 
-    # Create a BytesIO buffer to hold the PDF data
+    # Render the HTML template as a string
+    html = render_template("resume_preview.html", resume=resume)
+
+    # Create a BytesIO buffer to hold the PDF
     buffer = io.BytesIO()
-    pdf = canvas.Canvas(buffer, pagesize=letter)
-    width, height = letter
 
-    # Set some starting positions
-    y = height - 50
-    left_margin = 50
+    # Convert HTML to PDF
+    pisa_status = pisa.CreatePDF(io.StringIO(html), dest=buffer)
 
-    # Title / Header
-    pdf.setFont("Helvetica-Bold", 16)
-    pdf.drawString(left_margin, y, f"Resume: {resume.full_name}")
-    y -= 30
+    if pisa_status.err:
+        flash("Error generating PDF", "danger")
+        return redirect(url_for("resume"))
 
-    # Contact Details
-    pdf.setFont("Helvetica", 12)
-    pdf.drawString(left_margin, y, f"Email: {resume.email}")
-    y -= 20
-    pdf.drawString(left_margin, y, f"Phone: {resume.phone}")
-    y -= 30
-
-    # Professional Summary
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(left_margin, y, "Professional Summary:")
-    y -= 20
-    pdf.setFont("Helvetica", 12)
-    for line in resume.summary.split('\n'):
-        pdf.drawString(left_margin, y, line)
-        y -= 15
-    y -= 10
-
-        # Awards and honors
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(left_margin, y, "Professional Summary:")
-    y -= 20
-    pdf.setFont("Helvetica", 12)
-    for line in resume.Awards_and_honors.split('\n'):
-        pdf.drawString(left_margin, y, line)
-        y -= 15
-    y -= 10
-
-    # Education
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(left_margin, y, "Education:")
-    y -= 20
-    pdf.setFont("Helvetica", 12)
-    for line in resume.education.split('\n'):
-        pdf.drawString(left_margin, y, line)
-        y -= 15
-    y -= 10
-
-    # Work Experience
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(left_margin, y, "Experience:")
-    y -= 20
-    pdf.setFont("Helvetica", 12)
-    for line in resume.experience.split('\n'):
-        pdf.drawString(left_margin, y, line)
-        y -= 15
-    y -= 10
-
-    # Skills
-    pdf.setFont("Helvetica-Bold", 14)
-    pdf.drawString(left_margin, y, "Skills:")
-    y -= 20
-    pdf.setFont("Helvetica", 12)
-    for line in resume.skills.split('\n'):
-        pdf.drawString(left_margin, y, line)
-        y -= 15
-
-    pdf.showPage()
-    pdf.save()
-
-    # Move the buffer position to the beginning
+    # Move buffer position to the beginning
     buffer.seek(0)
-    
-    return Response(buffer, mimetype='application/pdf',
+
+    return Response(buffer, mimetype="application/pdf",
                     headers={"Content-Disposition": "attachment; filename=resume.pdf"})
+
+
 
 
 
