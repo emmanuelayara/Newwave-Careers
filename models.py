@@ -1,6 +1,7 @@
 from app import db, login_manager  # Import from our app instance
 from flask_login import UserMixin  # Provides default implementations for Flask-Login
 from datetime import datetime  # For timestamping user creation
+from enum import Enum
 from app import db
 
 
@@ -10,23 +11,33 @@ def load_user(user_id):
     # Query the User table by ID
     return User.query.get(int(user_id))
 
-# User model definition
+
+class UserRole(Enum):
+    JOB_SEEKER = "JOB SEEKER"
+    EMPLOYER = "EMPLOYER"
+    ADMIN = "ADMIN"
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
-    email = db.Column(db.String(150), unique=True, nullable=False)
+    email = db.Column(db.String(150), unique=True, nullable=False, index=True)
     password = db.Column(db.String(200), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     bio = db.Column(db.Text, nullable=True)
     location = db.Column(db.String(100), nullable=True)
+    role = db.Column(db.Enum(UserRole), nullable=False, default=UserRole.JOB_SEEKER)
     profile_image = db.Column(db.String(200), nullable=True, default='default.jpg')
-    
-    # Optionally, relationships for application history and saved jobs:
+
+    # Job Relationships
     applications = db.relationship('Application', backref='applicant', lazy=True)
     saved_jobs = db.relationship('Job', secondary='saved_jobs', backref='saved_by', lazy='dynamic')
 
+    def get_profile_image(self):
+        return self.profile_image if self.profile_image else 'default.jpg'
+
     def __repr__(self):
-        return f"User('{self.username}', '{self.email}')"
+        return f"User('{self.username}', '{self.email}', '{self.role}')"
+
 
 saved_jobs = db.Table('saved_jobs',
     db.Column('user_id', db.Integer, db.ForeignKey('user.id')),

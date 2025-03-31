@@ -15,7 +15,7 @@ from wtforms import StringField, TextAreaField, SubmitField
 from flask_wtf.file import FileField, FileAllowed
 from wtforms.validators import DataRequired, Email, Length
 from flask_wtf import FlaskForm
-from wtforms import StringField, TextAreaField, SubmitField, FieldList, FormField
+from wtforms import StringField, TextAreaField, SubmitField, FieldList, FormField, SelectField
 from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField
@@ -41,6 +41,9 @@ class RegistrationForm(FlaskForm):
 
     confirm_password = PasswordField('Confirm Password', 
                                      validators=[DataRequired(), EqualTo('password')])  # Confirm password
+    
+    role = SelectField('Role', choices=[( 'JOB_SEEKER'), ('EMPLOYER')],
+                      validators=[DataRequired()])
 
     submit = SubmitField('Sign Up')  # Submit button
 

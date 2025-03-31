@@ -4,7 +4,13 @@ from models import User  # Import User model
 from models import Education
 from models import WorkExperience
 from models import Resume
-import pdfkit
+from functools import wraps
+from flask import abort
+from flask_login import login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash
+from app import app, db
+from models import User
+from forms import RegistrationForm
 from flask import render_template, Response
 from xhtml2pdf import pisa
 import io
@@ -102,40 +108,38 @@ def delete_notification(notification_id):
     return redirect(url_for('notifications'))
 
 
-@app.route("/register", methods=['GET', 'POST'])
+@app.route("/register", methods=["GET", "POST"])
 def register():
-    form = RegistrationForm()  # Create an instance of the registration form
-
-    if form.validate_on_submit():  # Check if the form is valid when submitted
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')  # Hash the password
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)  # Create new user
-        db.session.add(user)  # Add user to database
-        db.session.commit()  # Save changes
-
-        flash('Your account has been created! You can now log in.', 'success')  # Success message
-        return redirect(url_for('login'))  # Redirect to login page
-
-    return render_template('register.html', title='Register', form=form)  # Render the registration page
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        hashed_password = generate_password_hash(form.password.data)
+        role = form.role.data  # Get role from the form ('job_seeker' or 'employer')
+        user = User(username=form.username.data, email=form.email.data, password=hashed_password, role=role)
+        db.session.add(user)
+        db.session.commit()
+        flash("Account created successfully! You can now log in.", "success")
+        return redirect(url_for("login"))
+    return render_template("register.html", form=form)
 
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    form = LoginForm()  # Assuming you're using a login form
+    form = LoginForm()
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        user = User.query.filter_by(email=email).first()
 
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()  # Find user by email
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            if user.role == "EMPLOYER":
+                return redirect(url_for('employer_dashboard'))
+            else:
+                return redirect(url_for('dashboard'))
 
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user)  # This properly logs in the user
+        flash('Invalid credentials', 'danger')
 
-            flash('Login successful!', 'success')
-            return redirect(url_for('dashboard'))
-
-        else:
-            flash('Invalid email or password.', 'danger')
-
-    return render_template('login.html', title='Login', form=form)
-
+    return render_template('login.html', form=form)
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -177,8 +181,18 @@ def profile():
 
 
 
+# Decorator to restrict routes to employers only
+def employer_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if current_user.role != "EMPLOYER":
+            abort(403)  # Forbidden
+        return f(*args, **kwargs)
+    return decorated_function
+
 @app.route("/post-job", methods=['GET', 'POST'])
 @login_required
+@employer_required
 def post_job():
     if request.method == 'POST':
         title = request.form.get('title')
@@ -191,7 +205,7 @@ def post_job():
         db.session.commit()
         
         flash('Job posted successfully!', 'success')
-        return redirect(url_for('dashboard'))
+        return redirect(url_for('employer_dashboard'))
 
     return render_template('post_job.html')
 
@@ -214,43 +228,19 @@ def apply(job_id):
     return render_template('apply.html', job=job)
 
 
-@app.route('/admin')
-@login_required
-def admin_dashboard():
-    if not current_user.is_admin:
-        flash("Access denied. Admins only.", "danger")
-        return redirect(url_for('dashboard'))
 
-    users = User.query.all()
-    jobs = Job.query.all()
-    return render_template('admin.html', users=users, jobs=jobs)
-
-
-@app.route('/admin/delete_user/<int:user_id>')
-@login_required
-def delete_user(user_id):
-    if not current_user.is_admin:
-        flash("Access denied. Admins only.", "danger")
-        return redirect(url_for('admin_dashboard'))
-
-    user = User.query.get_or_404(user_id)
-    db.session.delete(user)
-    db.session.commit()
-    flash("User deleted successfully.", "success")
-    return redirect(url_for('admin_dashboard'))
-
-@app.route('/admin/delete_job/<int:job_id>')
+@app.route('/employer/delete_job/<int:job_id>')
 @login_required
 def delete_job(job_id):
-    if not current_user.is_admin:
-        flash("Access denied. Admins only.", "danger")
-        return redirect(url_for('admin_dashboard'))
+    if not current_user.EMPLOYER:
+        flash("Access denied. employers only.", "danger")
+        return redirect(url_for('Employer_dashboard'))
 
     job = Job.query.get_or_404(job_id)
     db.session.delete(job)
     db.session.commit()
     flash("Job deleted successfully.", "success")
-    return redirect(url_for('admin_dashboard'))
+    return redirect(url_for('employer_dashboard'))
 
 
 @app.route("/jobs")
@@ -261,9 +251,18 @@ def jobs():
 
 
 @app.route("/dashboard")
-@login_required  # Ensures only logged-in users can access it
+@login_required
 def dashboard():
-    return render_template('dashboard.html', user=current_user)
+    if current_user.role == "employer":
+        return redirect(url_for("employer_dashboard"))
+    return redirect(url_for("employer_dashboard"))
+
+
+@app.route("/employer_dashboard")
+@login_required
+def employer_dashboard():
+    return render_template("employer_dashboard.html")
+
 
 
 @app.route("/resume", methods=["GET", "POST"])
