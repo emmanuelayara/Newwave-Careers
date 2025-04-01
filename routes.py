@@ -10,6 +10,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
 from app import app, db
 from models import User
+from models import UserRole
 from forms import RegistrationForm
 from flask import render_template, Response
 from xhtml2pdf import pisa
@@ -61,6 +62,17 @@ from flask import render_template, flash, redirect, url_for, abort
 from flask_login import login_required, current_user
 from models import Notification
 from werkzeug.utils import secure_filename
+
+import os
+from flask import request, flash, redirect, url_for
+from werkzeug.utils import secure_filename
+
+UPLOAD_FOLDER = 'uploads/'  # Set your uploads folder path
+ALLOWED_EXTENSIONS = {'pdf', 'docx'}
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in app.config['ALLOWED_EXTENSIONS']
@@ -132,7 +144,7 @@ def login():
 
         if user and check_password_hash(user.password, password):
             login_user(user)
-            if user.role == "EMPLOYER":
+            if user.role == UserRole.EMPLOYER:
                 return redirect(url_for('employer_dashboard'))
             else:
                 return redirect(url_for('dashboard'))
@@ -192,7 +204,6 @@ def employer_required(f):
 
 @app.route("/post-job", methods=['GET', 'POST'])
 @login_required
-@employer_required
 def post_job():
     if request.method == 'POST':
         title = request.form.get('title')
@@ -200,14 +211,15 @@ def post_job():
         company = request.form.get('company')
         location = request.form.get('location')
 
-        new_job = Job(title=title, description=description, company=company, location=location)
+        # Ensure the user ID is included
+        new_job = Job(title=title, description=description, company=company, location=location, user_id=current_user.id)
         db.session.add(new_job)
         db.session.commit()
-        
+
         flash('Job posted successfully!', 'success')
         return redirect(url_for('employer_dashboard'))
 
-    return render_template('post_job.html')
+    return render_template('post_job.html', UserRole=UserRole)
 
 
 @app.route("/apply/<int:job_id>", methods=['GET', 'POST'])
@@ -216,16 +228,27 @@ def apply(job_id):
     job = Job.query.get_or_404(job_id)
 
     if request.method == 'POST':
-        cover_letter = request.form.get('cover_letter')
+        cover_letter = request.files.get('cover_letter')
+        resume = request.files.get('resume')
+        other_docs = request.files.get('other_documents')
 
-        new_application = Application(job_id=job.id, user_id=current_user.id, cover_letter=cover_letter)
-        db.session.add(new_application)
-        db.session.commit()
-        
-        flash('Application submitted successfully!', 'success')
+        if not cover_letter or not resume:
+            flash("Cover letter and resume are required.", "danger")
+            return redirect(request.url)
+
+        for file in [cover_letter, resume, other_docs]:
+            if file and allowed_file(file.filename):
+                filename = secure_filename(file.filename)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            elif file:
+                flash("Only PDF and DOCX files are allowed.", "danger")
+                return redirect(request.url)
+
+        flash("Application submitted successfully!", "success")
         return redirect(url_for('jobs'))
 
-    return render_template('apply.html', job=job)
+    return render_template('apply.html', job=job, UserRole=UserRole)
+
 
 
 
@@ -246,23 +269,24 @@ def delete_job(job_id):
 @app.route("/jobs")
 def jobs():
     job_list = Job.query.all()
-    return render_template('jobs.html', jobs=job_list)
+    return render_template('jobs.html', jobs=job_list, UserRole=UserRole)
 
+@app.route("/manage_jobs")
+@login_required
+def manage_jobs():
+    return render_template("manage_jobs.html", UserRole=UserRole)
 
 
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    if current_user.role == "employer":
-        return redirect(url_for("employer_dashboard"))
-    return redirect(url_for("employer_dashboard"))
+    return render_template("dashboard.html", UserRole=UserRole)
 
 
 @app.route("/employer_dashboard")
 @login_required
 def employer_dashboard():
-    return render_template("employer_dashboard.html")
-
+    return render_template("employer_dashboard.html", UserRole=UserRole)
 
 
 @app.route("/resume", methods=["GET", "POST"])
@@ -366,8 +390,6 @@ def resume_download():
 
     return Response(buffer, mimetype="application/pdf",
                     headers={"Content-Disposition": "attachment; filename=resume.pdf"})
-
-
 
 
 

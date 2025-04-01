@@ -13,7 +13,7 @@ def load_user(user_id):
 
 
 class UserRole(Enum):
-    JOB_SEEKER = "JOB SEEKER"
+    JOB_SEEKER = "JOB_SEEKER"
     EMPLOYER = "EMPLOYER"
     ADMIN = "ADMIN"
 

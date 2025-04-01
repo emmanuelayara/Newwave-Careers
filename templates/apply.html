@@ -1,10 +1,45 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <h2>Apply for {{ job.title }}</h2>
-    <form method="POST">
-        <label>Cover Letter:</label>
-        <textarea name="cover_letter" required></textarea>
-        <button type="submit">Submit Application</button>
-    </form>
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">Apply for <span class="text-primary">{{ job.title }}</span></h2>
+
+        <form method="POST" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label for="cover_letter" class="form-label">Cover Letter:</label>
+                    <textarea class="form-control" id="cover_letter" name="cover_letter" rows="5" placeholder="Write your cover letter here..." required></textarea>
+                </div>
+
+            <div class="mb-3">
+                <label for="cover_letter" class="form-label">Upload Cover Letter (PDF/DOCX):</label>
+                <input type="file" class="form-control" id="cover_letter" name="cover_letter" accept=".pdf,.docx" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="resume" class="form-label">Upload Resume (PDF/DOCX):</label>
+                <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.docx" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="other_documents" class="form-label">Upload Additional Documents (Optional - PDF/DOCX):</label>
+                <input type="file" class="form-control" id="other_documents" name="other_documents" accept=".pdf,.docx">
+            </div>
+
+            <div class="d-grid">
+                <button type="submit" class="btn btn-primary">Submit Application</button>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
+
+
+
+
+
+<form method="POST">
+    <div class="mb-3">
+        <label for="cover_letter" class="form-label">Cover Letter:</label>
+        <textarea class="form-control" id="cover_letter" name="cover_letter" rows="5" placeholder="Write your cover letter here..." required></textarea>
+    </div>

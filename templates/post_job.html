@@ -1,20 +1,32 @@
 {% extends "layout.html" %}
 
 {% block content %}
-    <h2>Post a New Job</h2>
-    <form method="POST">
-        <label>Title:</label>
-        <input type="text" name="title" required>
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center text-primary">Post a New Job</h2>
+        <form method="POST" class="mt-4">
+            <div class="form-group">
+                <label for="title">Job Title:</label>
+                <input type="text" id="title" name="title" class="form-control" required>
+            </div>
 
-        <label>Description:</label>
-        <textarea name="description" required></textarea>
+            <div class="form-group">
+                <label for="description">Job Description:</label>
+                <textarea id="description" name="description" class="form-control" rows="4" required></textarea>
+            </div>
 
-        <label>Company:</label>
-        <input type="text" name="company" required>
+            <div class="form-group">
+                <label for="company">Company Name:</label>
+                <input type="text" id="company" name="company" class="form-control" required>
+            </div>
 
-        <label>Location:</label>
-        <input type="text" name="location" required>
+            <div class="form-group">
+                <label for="location">Job Location:</label>
+                <input type="text" id="location" name="location" class="form-control" required>
+            </div>
 
-        <button type="submit">Post Job</button>
-    </form>
+            <button type="submit" class="btn btn-primary btn-block">Post Job</button>
+        </form>
+    </div>
+</div>
 {% endblock %}

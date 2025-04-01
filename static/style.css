@@ -1,7 +1,6 @@
 /* Define Dark Blue Color Palette */
 :root {
     --main-blue: #003366;    /* Darker blue */
-    --light-blue: #336699;   /* Slightly lighter accent */
     --dark-blue: #002244;    /* Even darker for hover effects */
   }
   
