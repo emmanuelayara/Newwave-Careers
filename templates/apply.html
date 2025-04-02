@@ -1,38 +1,35 @@
 {% extends "layout.html" %}
-
 {% block content %}
 <div class="container mt-5">
     <div class="card shadow-lg p-4">
         <h2 class="text-center mb-4">Apply for <span class="text-primary">{{ job.title }}</span></h2>
 
         <form method="POST" enctype="multipart/form-data">
-                <div class="mb-3">
-                    <label for="cover_letter" class="form-label">Cover Letter:</label>
-                    <textarea class="form-control" id="cover_letter" name="cover_letter" rows="5" placeholder="Write your cover letter here..." required></textarea>
-                </div>
+            {{ form.hidden_tag() }}
 
             <div class="mb-3">
-                <label for="cover_letter" class="form-label">Upload Cover Letter (PDF/DOCX):</label>
-                <input type="file" class="form-control" id="cover_letter" name="cover_letter" accept=".pdf,.docx" required>
+                {{ form.cover_letter.label(class="form-label") }}
+                {{ form.cover_letter(class="form-control", rows=5, placeholder="Write your cover letter here...") }}
             </div>
 
             <div class="mb-3">
-                <label for="resume" class="form-label">Upload Resume (PDF/DOCX):</label>
-                <input type="file" class="form-control" id="resume" name="resume" accept=".pdf,.docx" required>
+                {{ form.upload_resume.label(class="form-label") }}
+                {{ form.upload_resume(class="form-control") }}
             </div>
 
             <div class="mb-3">
-                <label for="other_documents" class="form-label">Upload Additional Documents (Optional - PDF/DOCX):</label>
-                <input type="file" class="form-control" id="other_documents" name="other_documents" accept=".pdf,.docx">
+                {{ form.other_documents.label(class="form-label") }}
+                {{ form.other_documents(class="form-control") }}
             </div>
 
             <div class="d-grid">
-                <button type="submit" class="btn btn-primary">Submit Application</button>
+                {{ form.submit(class="btn btn-primary") }}
             </div>
         </form>
     </div>
 </div>
 {% endblock %}
+
 
 
 

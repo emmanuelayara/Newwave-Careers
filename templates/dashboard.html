@@ -34,9 +34,9 @@
     <div class="card mb-3">
       <div class="card-body">
         <h4 class="card-title">Application History</h4>
-        {% if current_user.applications %}
+        {% if current_user.user_applications %}
           <ul class="list-group">
-            {% for app in current_user.applications %}
+            {% for app in current_user.user_applications %}
               <li class="list-group-item">
                 <strong>{{ app.job.title }}</strong> at {{ app.job.company }} on {{ app.date_applied.strftime("%Y-%m-%d") }}
               </li>

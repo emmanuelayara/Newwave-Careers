@@ -52,11 +52,9 @@ class Job(db.Model):
     company = db.Column(db.String(100), nullable=False)
     location = db.Column(db.String(100), nullable=False)
     date_posted = db.Column(db.DateTime, default=datetime.utcnow)
-    applications = db.relationship('Application', backref='job', lazy=True)
+    applications = db.relationship('Application', backref='job_applications', lazy=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
-
-
     def __repr__(self):
         return f"Job('{self.title}', '{self.company}')"
 
@@ -65,8 +63,13 @@ class Application(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    cover_letter = db.Column(db.Text, nullable=False)
+    cover_letter = db.Column(db.String(255), nullable=False)  # Store file path
+    upload_resume = db.Column(db.String(255), nullable=False)  # Store file path
+    other_documents = db.Column(db.String(255), nullable=True)  # Optional file path
     date_applied = db.Column(db.DateTime, default=datetime.utcnow)
+
+job = db.relationship('Job', backref=db.backref('job_applications', lazy=True), lazy=True)
+user = db.relationship('User', backref=db.backref('user_applications', lazy=True), lazy=True)
 
 
 class Resume(db.Model):

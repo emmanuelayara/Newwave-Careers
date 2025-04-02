@@ -20,6 +20,10 @@ from wtforms.validators import DataRequired
 from flask_wtf import FlaskForm
 from wtforms import StringField, TextAreaField, SubmitField
 from wtforms.validators import DataRequired, Length
+from flask_wtf import FlaskForm
+from wtforms import TextAreaField, SubmitField
+from flask_wtf.file import FileField, FileAllowed, FileRequired
+from wtforms.validators import DataRequired
 
 
 
@@ -87,6 +91,13 @@ class ResumeForm(FlaskForm):
     submit = SubmitField("Save Resume")
 
 
+class ApplicationForm(FlaskForm):
+    cover_letter = TextAreaField("Cover Letter", validators=[DataRequired()])
+    upload_resume = FileField("Upload Resume (PDF/DOCX)", 
+                       validators=[FileRequired(), FileAllowed(['pdf', 'docx'], 'PDF and DOCX only!')])
+    other_documents = FileField("Upload Additional Documents (Optional - PDF/DOCX)", 
+                                validators=[FileAllowed(['pdf', 'docx'], 'PDF and DOCX only!')])
+    submit = SubmitField("Submit Application")
 
 
 class ProfileForm(FlaskForm):

@@ -14,6 +14,12 @@ from models import UserRole
 from forms import RegistrationForm
 from flask import render_template, Response
 from xhtml2pdf import pisa
+from flask import render_template, flash, redirect, url_for, request
+from flask_login import login_required, current_user
+from werkzeug.utils import secure_filename
+from forms import ApplicationForm
+from models import Application
+import os
 import io
 from flask import render_template, Response, flash, redirect, url_for
 from flask_login import login_required, current_user
@@ -82,7 +88,7 @@ def allowed_file(filename):
 
 @app.route("/")
 def home():
-    return render_template("home.html", title="Home")
+    return render_template("home.html", title="Home", UserRole=UserRole)
 
 
 @app.route('/notifications')
@@ -92,7 +98,7 @@ def notifications():
     notifications = Notification.query.filter_by(user_id=current_user.id)\
                                         .order_by(Notification.timestamp.desc())\
                                         .all()
-    return render_template('notifications.html', notifications=notifications)
+    return render_template('notifications.html', notifications=notifications, UserRole=UserRole)
 
 
 @app.route('/notifications/read/<int:notification_id>')
@@ -131,7 +137,7 @@ def register():
         db.session.commit()
         flash("Account created successfully! You can now log in.", "success")
         return redirect(url_for("login"))
-    return render_template("register.html", form=form)
+    return render_template("register.html", form=form, UserRole=UserRole)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -151,7 +157,7 @@ def login():
 
         flash('Invalid credentials', 'danger')
 
-    return render_template('login.html', form=form)
+    return render_template('login.html', form=form, UserRole=UserRole)
 
 
 @app.route('/profile', methods=['GET', 'POST'])
@@ -189,7 +195,7 @@ def profile():
         form.bio.data = current_user.bio
         form.location.data = current_user.location
 
-    return render_template('profile.html', form=form)
+    return render_template('profile.html', form=form, UserRole=UserRole)
 
 
 
@@ -226,28 +232,43 @@ def post_job():
 @login_required
 def apply(job_id):
     job = Job.query.get_or_404(job_id)
+    form = ApplicationForm()
 
-    if request.method == 'POST':
-        cover_letter = request.files.get('cover_letter')
-        resume = request.files.get('resume')
-        other_docs = request.files.get('other_documents')
+    if form.validate_on_submit():
+        cover_letter_text = form.cover_letter.data
+        resume_file = form.upload_resume.data
+        other_docs_file = form.other_documents.data
 
-        if not cover_letter or not resume:
-            flash("Cover letter and resume are required.", "danger")
-            return redirect(request.url)
+        # Ensure upload folder exists
+        upload_folder = app.config['UPLOAD_FOLDER']
+        os.makedirs(upload_folder, exist_ok=True)
 
-        for file in [cover_letter, resume, other_docs]:
-            if file and allowed_file(file.filename):
-                filename = secure_filename(file.filename)
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-            elif file:
-                flash("Only PDF and DOCX files are allowed.", "danger")
-                return redirect(request.url)
+        def save_file(file):
+            """Helper function to save file and return filename"""
+            filename = secure_filename(file.filename)
+            filepath = os.path.join(upload_folder, filename)
+            file.save(filepath)
+            return filename
+
+        resume_path = save_file(resume_file)
+        other_docs_path = save_file(other_docs_file) if other_docs_file else None
+
+        # Save application to the database
+        application = Application(
+            job_id=job.id,
+            user_id=current_user.id,
+            cover_letter=cover_letter_text,
+            upload_resume=resume_path,
+            other_documents=other_docs_path
+        )
+        db.session.add(application)
+        db.session.commit()
 
         flash("Application submitted successfully!", "success")
         return redirect(url_for('jobs'))
 
-    return render_template('apply.html', job=job, UserRole=UserRole)
+    return render_template('apply.html', job=job, form=form, UserRole=UserRole)
+
 
 
 
@@ -344,7 +365,7 @@ def resume():
            
             return redirect(url_for("resume_preview"))
     
-    return render_template("resume.html", form=form)
+    return render_template("resume.html", form=form, UserRole=UserRole)
 
 
 @app.route("/resume/preview")
@@ -359,7 +380,7 @@ def resume_preview():
     education = Education.query.filter_by(resume_id=resume.id).all()
     experience = WorkExperience.query.filter_by(resume_id=resume.id).all()
 
-    return render_template("resume_preview.html", resume=resume, education=education, experience=experience)
+    return render_template("resume_preview.html", resume=resume, education=education, experience=experience, UserRole=UserRole)
 
 
 
