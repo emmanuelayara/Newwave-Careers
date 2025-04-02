@@ -271,8 +271,6 @@ def apply(job_id):
 
 
 
-
-
 @app.route('/employer/delete_job/<int:job_id>')
 @login_required
 def delete_job(job_id):
@@ -292,11 +290,6 @@ def jobs():
     job_list = Job.query.all()
     return render_template('jobs.html', jobs=job_list, UserRole=UserRole)
 
-@app.route("/manage_jobs")
-@login_required
-def manage_jobs():
-    return render_template("manage_jobs.html", UserRole=UserRole)
-
 
 @app.route("/dashboard")
 @login_required
@@ -308,6 +301,25 @@ def dashboard():
 @login_required
 def employer_dashboard():
     return render_template("employer_dashboard.html", UserRole=UserRole)
+
+
+@app.route("/employer_manage_jobs")
+@login_required
+def employer_manage_jobs():
+    return render_template("manage_jobs.html", UserRole=UserRole)
+
+
+@app.route('/manage_jobs')
+@login_required
+def manage_jobs():
+    if current_user.role != 'EMPLOYER':  # Ensure only employers access this
+        return redirect(url_for('home'))
+
+    jobs = Job.query.filter_by(employer_id=current_user.id).all()  # Get all jobs posted by the employer
+    job_applications = {job.id: Application.query.filter_by(job_id=job.id).all() for job in jobs}  # Get applications for each job
+
+    return render_template('manage_jobs.html', jobs=jobs, job_applications=job_applications, UserRole=UserRole)
+
 
 
 @app.route("/resume", methods=["GET", "POST"])

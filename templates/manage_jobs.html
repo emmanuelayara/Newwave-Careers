@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h2>Manage Jobs</h2>
+
+{% if jobs %}
+    <ul>
+        {% for job in jobs %}
+            <li>
+                <h3>{{ job.title }}</h3>
+                <p>{{ job.description }}</p>
+                <p>Posted on: {{ job.date_posted }}</p>
+
+                <h4>Applications:</h4>
+                {% if job_applications[job.id] %}
+                    <ul>
+                        {% for application in job_applications[job.id] %}
+                            <li>Applicant: {{ application.user.name }} | Applied on: {{ application.date_applied }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>No applications yet.</p>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No jobs posted yet.</p>
+{% endif %}
+
+{% endblock %}

@@ -25,6 +25,7 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     bio = db.Column(db.Text, nullable=True)
     location = db.Column(db.String(100), nullable=True)
+    applications = db.relationship('Application', backref='user_applications', lazy=True)  # Link Applications
     role = db.Column(db.Enum(UserRole), nullable=False, default=UserRole.JOB_SEEKER)
     profile_image = db.Column(db.String(200), nullable=True, default='default.jpg')
 
