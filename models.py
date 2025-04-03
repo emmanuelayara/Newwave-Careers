@@ -53,9 +53,15 @@ class Job(db.Model):
     company = db.Column(db.String(100), nullable=False)
     location = db.Column(db.String(100), nullable=False)
     date_posted = db.Column(db.DateTime, default=datetime.utcnow)
-    applications = db.relationship('Application', backref='job_applications', lazy=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     
+    applications = db.relationship('Application', backref='job_applications', lazy=True)
+    
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    employer_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_job_employer_id'), nullable=False)
+
+    # Explicitly specifying foreign_keys to resolve ambiguity
+    employer = db.relationship('User', foreign_keys=[employer_id], backref=db.backref('jobs', lazy=True))
+
     def __repr__(self):
         return f"Job('{self.title}', '{self.company}')"
 

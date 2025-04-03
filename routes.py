@@ -218,7 +218,7 @@ def post_job():
         location = request.form.get('location')
 
         # Ensure the user ID is included
-        new_job = Job(title=title, description=description, company=company, location=location, user_id=current_user.id)
+        new_job = Job(title=title, description=description, company=company, location=location, user_id=current_user.id, employer_id=current_user.id)
         db.session.add(new_job)
         db.session.commit()
 
@@ -312,11 +312,14 @@ def employer_manage_jobs():
 @app.route('/manage_jobs')
 @login_required
 def manage_jobs():
-    if current_user.role != 'EMPLOYER':  # Ensure only employers access this
-        return redirect(url_for('home'))
+    print(f"Current User: {current_user.username}, Role: {current_user.role}")  # Debugging
 
-    jobs = Job.query.filter_by(employer_id=current_user.id).all()  # Get all jobs posted by the employer
-    job_applications = {job.id: Application.query.filter_by(job_id=job.id).all() for job in jobs}  # Get applications for each job
+    if current_user.role != 'EMPLOYER':  # Ensure only employers access this
+        print("Redirecting to home: User is not an employer.")  # Debugging
+        return redirect(url_for('employer_manage_jobs'))
+
+    jobs = Job.query.filter_by(employer_id=current_user.id).all()  
+    job_applications = {job.id: Application.query.filter_by(job_id=job.id).all() for job in jobs}  
 
     return render_template('manage_jobs.html', jobs=jobs, job_applications=job_applications, UserRole=UserRole)
 
