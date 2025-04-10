@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect  # Flask utilities
+from flask import render_template, url_for, flash, redirect, abort  # Flask utilities
 from app import app, db, bcrypt  # Import app, database, and bcrypt
 from models import User  # Import User model
 from models import Education
@@ -10,6 +10,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
 from app import app, db
 from models import User
+from models import BlogPost
 from models import UserRole
 from forms import RegistrationForm
 from flask import render_template, Response
@@ -286,6 +287,7 @@ def delete_job(job_id):
 
 
 @app.route("/jobs")
+@login_required
 def jobs():
     job_list = Job.query.all()
     return render_template('jobs.html', jobs=job_list, UserRole=UserRole)
@@ -427,6 +429,19 @@ def resume_download():
     return Response(buffer, mimetype="application/pdf",
                     headers={"Content-Disposition": "attachment; filename=resume.pdf"})
 
+
+
+@app.route('/blog')
+def blog():
+    posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
+    return render_template('blog.html', posts=posts)
+
+@app.route('/blog/<slug>')
+def blog_post(slug):
+    post = BlogPost.query.filter_by(slug=slug).first()
+    if not post:
+        abort(404)
+    return render_template('blog_post.html', post=post)
 
 
 @app.route('/logout')

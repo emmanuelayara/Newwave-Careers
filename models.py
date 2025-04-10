@@ -124,3 +124,12 @@ class Notification(db.Model):
 
     def __repr__(self):
         return f"Notification('{self.message}', Read: {self.read})"
+
+
+class BlogPost(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(150), nullable=False)
+    slug = db.Column(db.String(150), unique=True, nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    author = db.Column(db.String(100), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
