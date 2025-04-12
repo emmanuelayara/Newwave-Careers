@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}Newwave{% endblock %}</title>
@@ -20,10 +21,12 @@
       <ul class="navbar-nav mr-auto">
         {% if current_user.is_authenticated %}
           {% if current_user.role == UserRole.JOB_SEEKER %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('blog') }}">Blog & News</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('jobs') }}">Jobs</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('notifications') }}">Notifications</a></li>
           {% elif current_user.role == UserRole.EMPLOYER %}
+            <li class="nav-item"><a class="nav-link" href="{{ url_for('blog') }}">Blog & News</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('employer_dashboard') }}">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('post_job') }}">Post a Job</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('manage_jobs') }}">Manage Jobs</a></li>
@@ -32,9 +35,9 @@
             <li class="nav-item"><a class="nav-link" href="{{ url_for('admin_dashboard') }}">Admin</a></li>
           {% endif %}
         {% else %}
+          <li class="nav-item"><a class="nav-link" href="{{ url_for('blog') }}">Blog & News</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('login') }}">Login</a></li>
           <li class="nav-item"><a class="nav-link" href="{{ url_for('register') }}">Register</a></li>
-          <li class="nav-item"><a class="nav-link" href="{{ url_for('blog') }}">Blog & News</a></li>
         {% endif %}
       </ul>
       {% if current_user.is_authenticated %}
@@ -63,8 +66,61 @@
     {% block content %}{% endblock %}
   </div>
 
-  <footer class="footer bg-primary text-white mt-5 py-3 text-center">
-    &copy; 2025 New Wave Careers. All rights reserved.
+
+
+  <footer class="footer bg-primary text-white mt-5 py-3">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-4 gap-10">
+      
+      <!-- Brand Info -->
+
+  
+      <!-- Quick Links -->
+      <div>
+        <h6 class="text-xl font-semibold text-blue-900 mb-4"></h6>
+        <div class="flex flex-col text-right text-left space-y-3">
+          <a href="{{ url_for('home') }}" class="bg-blue-700 hover:bg-blue-800 text-blue-900 px-4 py-2 rounded text-sm transition duration-300">Home</a>
+          <a href="{{ url_for('jobs') }}" class="bg-blue-700 hover:bg-blue-800 text-blue-900 px-4 py-2 rounded text-sm transition duration-300">Browse Jobs</a>
+          <a href="{{ url_for('blog') }}" class="bg-blue-700 hover:bg-blue-800 text-blue-900 px-4 py-2 rounded text-sm transition duration-300">Blog</a>
+
+
+
+          <a href="https://instagram.com/newwavecareers" target="_blank" class="bg-blue-700 hover:bg-blue-800 flex items-center px-4 py-2 rounded transition duration-300">
+            <i class="fab fa-instagram mr-2"></i>Instagram
+          </a>
+          <a href="https://twitter.com/newwavecareers" target="_blank" class="bg-blue-700 hover:bg-blue-800 flex items-center px-4 py-2 rounded transition duration-300">
+            <i class="fab fa-twitter mr-2"></i>Twitter
+          </a>
+          <a href="https://linkedin.com/company/newwavecareers" target="_blank" class="bg-blue-700 hover:bg-blue-800 flex items-center px-4 py-2 rounded transition duration-300">
+            <i class="fab fa-linkedin mr-2"></i>LinkedIn
+          </a>
+          <a href="https://facebook.com/newwavecareers" target="_blank" class="bg-blue-700 hover:bg-blue-800 flex items-center px-4 py-2 rounded transition duration-300">
+            <i class="fab fa-facebook mr-2"></i>Facebook
+          </a>
+        </div>
+      </div>
+  
+
+      <!-- Newsletter -->
+      <div>
+        <h4 class="text-xl font-semibold text-blue-900 mb-4">Join Our Newsletter</h4>
+        <form action="#" method="POST" class="flex flex-col space-y-3">
+          <input type="email" placeholder="Enter your email"
+                 class="p-3 rounded bg-blue-800 border border-blue-700 text-blue-900 placeholder-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400">
+          <button type="submit"
+                  class="bg-white text-blue-900 font-semibold py-2 px-4 rounded hover:bg-gray-200 transition duration-300">
+            Subscribe
+          </button>
+        </form>
+      </div>
+  
+    </div>
+  
+    <!-- Bottom Section -->
+    <div class="mt-12 border-t border-blue-800 pt-6 text-center text-blue-900 text-sm text-gray-300">
+      <p><em>I Shine. You Shine. We All Shine.</em></p>
+
+      &copy; 2025 New Wave Careers. All rights reserved.
+    </div>
   </footer>
 
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>

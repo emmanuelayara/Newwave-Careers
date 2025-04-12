@@ -5,7 +5,10 @@ from models import Education
 from models import WorkExperience
 from models import Resume
 from functools import wraps
+from slugify import slugify
 from flask import abort
+from flask import render_template, redirect, url_for, flash, request
+from flask_login import login_required, current_user
 from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.security import generate_password_hash
 from app import app, db
@@ -434,14 +437,31 @@ def resume_download():
 @app.route('/blog')
 def blog():
     posts = BlogPost.query.order_by(BlogPost.created_at.desc()).all()
-    return render_template('blog.html', posts=posts)
+    return render_template('blog.html', posts=posts, UserRole=UserRole)
 
 @app.route('/blog/<slug>')
 def blog_post(slug):
     post = BlogPost.query.filter_by(slug=slug).first()
     if not post:
         abort(404)
-    return render_template('blog_post.html', post=post)
+    return render_template('blog_post.html', post=post, UserRole=UserRole)
+
+
+
+@app.route('/create-post', methods=['GET', 'POST'])
+@login_required
+def create_post():
+    if request.method == 'POST':
+        title = request.form['title']
+        content = request.form['content']
+        slug = slugify(title)  # you should have a slugify function
+
+        new_post = BlogPost(title=title, content=content, slug=slug)
+        db.session.add(new_post)
+        db.session.commit()
+        return redirect(url_for('blog'))
+    return render_template('create_post.html', UserRole=UserRole)
+
 
 
 @app.route('/logout')

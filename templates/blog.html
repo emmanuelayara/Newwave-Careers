@@ -5,16 +5,25 @@
   <div class="container mx-auto px-4">
     <h2 class="text-3xl font-bold text-center mb-10">Latest Blog Posts</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      {% for post in posts %}
-      <div class="bg-white p-6 rounded-lg shadow hover:shadow-md transition">
-        <h3 class="text-xl font-semibold mb-2">{{ post.title }}</h3>
-        <p class="text-sm text-gray-500 mb-4">By {{ post.author }} • {{ post.created_at.strftime('%B %d, %Y') }}</p>
-        <p class="text-gray-700 mb-4">{{ post.content[:150] }}...</p>
-        <a href="{{ url_for('blog_post', slug=post.slug) }}" class="text-blue-600 font-semibold">Read More →</a>
-      </div>
-      {% endfor %}
+<a href="{{ url_for('create_post') }}" class="bg-blue-600 text-blue-800 py-2 px-4 rounded hover:bg-blue-700"> + Make a Post </a>
+
+{% for post in posts %}
+  <div class="bg-white p-6 rounded shadow">
+    <h3 class="font-semibold text-xl mb-2">{{ post.title }}</h3>
+    <p class="text-sm text-gray-600 mb-2">{{ post.created_at.strftime('%B %d, %Y') }}</p>
+    <p>{{ post.content[:150] }}...</p>
+    <a href="{{ url_for('blog_post', slug=post.slug) }}" class="text-blue-600 mt-2 inline-block">Read More →</a>
+  </div>
+{% else %}
+  <p>No blog posts available yet.</p>
+{% endfor %}
     </div>
   </div>
 </section>
+
+<a href="{{ url_for('create_post') }}" 
+   class="inline-block bg-blue-600 text-blue-800 font-semibold py-2 px-4 rounded shadow hover:bg-blue-700 transition duration-200">
+  + Make a Post
+</a>
 
 {% endblock %}
