@@ -204,7 +204,7 @@ def profile():
 
 
 # Decorator to restrict routes to employers only
-def employer_required(f):
+def employer_required(f):    
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if current_user.role != "EMPLOYER":
