@@ -1,145 +1,160 @@
 {% extends 'layout.html' %} 
 {% block content %}
 
-<figure class="text-center">
-    <blockquote class="blockquote">
-      <p><h3> - Guiding You Through the Wave of Opportunities to Your Dreams - </h3></p>
-    </blockquote>
-    <figcaption class="blockquote-footer">
-      Bringing The <b>New Wave</b> <cite title="Source Title">To You</cite>
-    </figcaption>
-</figure>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Development Platform</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
 
-<!-- CORE SERVICES -->
-<section class="py-20 bg-white">
-  <div class="container mx-auto px-6 text-center">
-    <h2 class="text-3xl font-bold text-blue-700 mb-12">Our Core Services</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-      <div class="p-6 bg-blue-50 rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105">
-        <h3 class="text-xl font-semibold text-blue-800 mb-2">Job Board</h3>
-        <p class="text-gray-600">Access thousands of remote and onsite job listings.</p>
-      </div>
-      <div class="p-6 bg-blue-50 rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105">
-        <h3 class="text-xl font-semibold text-blue-800 mb-2">Career Development</h3>
-        <p class="text-gray-600">Workshops, bootcamps, and mentorships to grow your skills.</p>
-      </div>
-      <div class="p-6 bg-blue-50 rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105">
-        <h3 class="text-xl font-semibold text-blue-800 mb-2">Resume Builder</h3>
-        <p class="text-gray-600">Create professional resumes with our guided tools.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- HOW IT WORKS -->
-<section class="bg-blue-50 py-20">
-  <div class="container mx-auto px-6 text-center">
-    <h2 class="text-3xl font-bold text-blue-700 mb-12">How It Works</h2>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
-      {% for step in ['Sign Up', 'Build Your Profile', 'Explore/Post Jobs', 'Apply / Hire with Confidence'] %}
-      <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105">
-        <div class="text-blue-700 text-4xl font-bold mb-4">{{ loop.index }}</div>
-        <p class="font-medium text-gray-700">{{ step }}</p>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<!-- BLOG & NEWS -->
-<section class="bg-gray-50 py-20">
-  <div class="container mx-auto px-6">
-    <h2 class="text-3xl font-bold text-blue-700 text-center mb-12">Latest News & Blog</h2>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
-      {% for title, date, summary in [
-        ('Tips to Ace Your Next Interview', 'March 20, 2025', 'Discover the top strategies to impress hiring managers and land your dream job.'),
-        ('Remote Work Trends in 2025', 'March 18, 2025', 'Stay ahead with insights into how remote work is shaping the future of employment.'),
-        ('Top 5 Skills Employers Want', 'March 15, 2025', 'Boost your employability by learning these must-have professional skills.')
-      ] %}
-      <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105">
-        <h3 class="text-xl font-semibold text-blue-800 mb-1">{{ title }}</h3>
-        <p class="text-sm text-gray-500 mb-3">{{ date }}</p>
-        <p class="text-gray-700 mb-4">{{ summary }}</p>
-        <a href="{{ url_for('blog') }}" class="text-blue-600 font-medium hover:underline">Read More →</a>
-      </div>
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<!-- IMPACT COUNTERS -->
-<section class="bg-white py-20">
-  <div class="container mx-auto px-6 text-center">
-    <h2 class="text-3xl font-bold text-blue-700 mb-12">Our Impact</h2>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-10">
-      {% for label, count in [('Jobs Listed', 3000), ('Candidates Placed', 2000), ('Partners', 300), ('Career Programs', 150)] %}
+  <!-- Hero Section -->
+  <section class="hero bg-light py-5">
+    <div class="container d-flex align-items-center justify-content-between flex-column flex-md-row">
       <div>
-        <div class="text-4xl font-extrabold text-blue-600" data-count="{{ count }}">0</div>
-        <p class="text-gray-600 mt-2">{{ label }}</p>
+        <h3 class="display-5 fw-bold">Guiding You Through the Wave of Opportunities to Your Dreams</h3> <br>
+        <figcaption class="blockquote-footer">
+          Bringing The <b>New Wave</b> <cite title="Source Title">To You</cite>
+        </figcaption>
+        <p class="lead"> Access the tools and resources you need to achieve your career goals.</p>
+        <a href="{{ url_for('login') }}" class="btn btn-primary btn-lg mt-3">Get Started</a>
       </div>
-      {% endfor %}
+      <img src="static/career picture.jpeg" alt="Career graphics" class="img-fluid rounded mt-4 mt-md-0" />
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- PARTNERS -->
-<section class="bg-gray-100 py-20">
-  <div class="container mx-auto px-6 text-center">
-    <h2 class="text-3xl font-bold text-blue-700 mb-12">Trusted by Leading Companies</h2>
-    <div class="flex flex-wrap justify-center items-center gap-8">
-      {% for i in range(1, 5) %}
-      <img src="{{ url_for('static', filename='simplylaw logo.jpg') }}" alt="SimplyLaw" class="hover:grayscale-0 transition transform hover:scale-110" style="width: 80px; height: auto;">
-      {% endfor %}
-    </div>
-  </div>
-</section>
-
-<!-- TESTIMONIALS -->
-<section class="py-20 bg-white">
-  <div class="container mx-auto px-6 text-center">
-    <h2 class="text-3xl font-bold text-blue-700 mb-12">What People Are Saying</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-      {% for quote, name in [
-        ('NewWave helped me land my first remote job!', 'Grace E.'),
-        ('The resume builder was a game-changer for me.', 'Michael T.'),
-        ('Thanks to NewWave, I now have a better career direction.', 'Ifeanyi U.')
-      ] %}
-      <div class="bg-blue-50 p-6 rounded-lg shadow-lg hover:shadow-xl transition transform hover:scale-105">
-        <p class="italic text-gray-700 mb-2">“{{ quote }}”</p>
-        <span class="font-semibold text-blue-800">— {{ name }}</span>
+  <!-- Features Section -->
+  <section class="features py-5 bg-white text-center">
+    <div class="container">
+      <div class="row g-4">
+        <div class="col-md-3">
+          <div class="feature-box p-3 border rounded shadow-sm">
+            <i class="bi bi-person-lines-fill display-6"></i>
+            <h5>Career Coaching</h5>
+            <p>One-on-one guidance from career advisors.</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="feature-box p-3 border rounded shadow-sm">
+            <i class="bi bi-file-earmark-person-fill display-6"></i>
+            <h5>Resume Builder</h5>
+            <p>Create professional resumes easily.</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="feature-box p-3 border rounded shadow-sm">
+            <i class="bi bi-briefcase-fill display-6"></i>
+            <h5>Job Listings</h5>
+            <p>Explore new job opportunities daily.</p>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="feature-box p-3 border rounded shadow-sm">
+            <i class="bi bi-check2-circle display-6"></i>
+            <h5>Skill Assessments</h5>
+            <p>Test and showcase your professional skills.</p>
+          </div>
+        </div>
       </div>
-      {% endfor %}
     </div>
-  </div>
-</section>
+  </section>
 
-<!-- CALL TO ACTION -->
-<section class="bg-blue-700 text-white py-20 text-center">
-  <div class="container mx-auto px-6">
-    <h2 class="text-3xl md:text-4xl font-bold mb-4">Ready to take your career to the next level?</h2>
-    <a href="{{ url_for('register') }}" class="bg-white text-blue-700 font-semibold py-3 px-8 rounded-full shadow-lg hover:bg-blue-100 transition">Join Now</a>
-  </div>
-</section>
+  <!-- User Categories -->
+  <section class="audience py-5 bg-light">
+    <div class="container text-center">
+      <div class="row">
+        <div class="col-md-4">
+          <h6>For Job Seekers</h6>
+          <a href="#">Learn more about job hunting</a>
+        </div>
+        <div class="col-md-4">
+          <h6>For Professionals</h6>
+          <a href="#">Advance your career today</a>
+        </div>
+        <div class="col-md-4">
+          <h6>For Employers</h6>
+          <a href="#">Post jobs and find talent</a>
+        </div>
+      </div>
+    </div>
+  </section>
 
-<!-- COUNTER SCRIPT -->
-<script>
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll('[data-count]').forEach(counter => {
-      const updateCount = () => {
-        const target = +counter.getAttribute('data-count');
-        const count = +counter.innerText;
-        const increment = Math.ceil(target / 100);
+  <!-- How It Works -->
+  <section class="how-it-works py-5 text-center">
+    <div class="container">
+      <h2 class="mb-4">How It Works</h2>
+      <div class="row g-4">
+        <div class="col-md-4">
+          <i class="bi bi-person-plus display-6"></i>
+          <h6>Sign Up</h6>
+        </div>
+        <div class="col-md-4">
+          <i class="bi bi-person-badge display-6"></i>
+          <h6>Build Profile</h6>
+        </div>
+        <div class="col-md-4">
+          <i class="bi bi-people display-6"></i>
+          <h6>Get Matched</h6>
+        </div>
+      </div>
+    </div>
+  </section>
 
-        if (count < target) {
-          counter.innerText = count + increment;
-          setTimeout(updateCount, 20);
-        } else {
-          counter.innerText = target;
-        }
-      };
-      updateCount();
-    });
-  });
-</script>
+  <!-- Jobs and Training -->
+  <section class="jobs-training bg-white py-5">
+    <div class="container">
+      <div class="row g-5">
+        <div class="col-md-6">
+          <h4>Popular Job Categories</h4>
+          <ul class="list-group">
+            <li class="list-group-item">Software Development</li>
+            <li class="list-group-item">Project Management</li>
+            <li class="list-group-item">Marketing</li>
+            <li class="list-group-item">Healthcare</li>
+            <li class="list-group-item">Sales</li>
+          </ul>
+        </div>
+        <div class="col-md-6">
+          <h4>Featured Training Programs</h4>
+          <ul class="list-group">
+            <li class="list-group-item">Data Science Bootcamp</li>
+            <li class="list-group-item">Project Management Certification</li>
+            <li class="list-group-item">Digital Marketing Course</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resume Preview & Testimonial -->
+  <section class="resume-testimonial py-5 bg-light">
+    <div class="container">
+      <div class="row g-5">
+        <div class="col-md-6">
+          <h4>Resume Builder Preview</h4>
+          <div class="border rounded p-3 bg-white d-flex flex-wrap justify-content-between">
+            <img src="static/resume Preview.png" alt="Career graphics" class="img-fluid rounded w-50 p-2" />
+            <img src="static/resume Preview 2.png" alt="Career graphics" class="img-fluid rounded w-50 p-2" />
+          </div>          
+        </div>
+        <div class="col-md-6">
+          <h4>Success Stories</h4>
+          <blockquote class="blockquote">
+            <p>"Thanks to this platform, I landed my first job in just a few months. The support was invaluable."</p>
+            <footer class="blockquote-footer">Miracle R.</footer>
+          </blockquote>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
 
 {% endblock %}
