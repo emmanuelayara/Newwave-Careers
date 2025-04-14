@@ -16,6 +16,7 @@ from models import User
 from models import BlogPost
 from models import UserRole
 from forms import RegistrationForm
+from forms import EmployerProfileForm
 from flask import render_template, Response
 from xhtml2pdf import pisa
 from flask import render_template, flash, redirect, url_for, request
@@ -203,26 +204,67 @@ def profile():
 
 
 
-# Decorator to restrict routes to employers only
-def employer_required(f):    
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if current_user.role != "EMPLOYER":
-            abort(403)  # Forbidden
-        return f(*args, **kwargs)
-    return decorated_function
+@app.route('/employer_profile', methods=['GET', 'POST'])
+@login_required
+def employer_profile():
+    form = EmployerProfileForm()
+    
+    if form.validate_on_submit():
+        # Update text fields
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        current_user.bio = form.bio.data
+        current_user.location = form.location.data
+        
+        # Handle profile image upload if provided
+        if form.profile_image.data:
+            file = form.profile_image.data
+            if file and allowed_file(file.filename):
+                # Create a secure filename
+                filename = secure_filename(file.filename)
+                # Optionally, prepend user id or username to the filename to avoid collisions
+                filename = f"user_{current_user.id}_{filename}"
+                file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+                file.save(file_path)
+                # Save the filename in the database (relative path)
+                current_user.profile_image = filename
+
+        db.session.commit()
+        flash('Your profile has been updated!', 'success')
+        return redirect(url_for('employer_dashboard'))  # Redirect to dashboard after updating profile
+    elif request.method == 'GET':
+        # Pre-populate form with current user data
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+        form.bio.data = current_user.bio
+        form.location.data = current_user.location
+
+    return render_template('employer_profile.html', form=form, UserRole=UserRole)
+
 
 @app.route("/post-job", methods=['GET', 'POST'])
 @login_required
 def post_job():
+    # Ensure only employers can access
+    if current_user.role != UserRole.EMPLOYER:
+        flash('Access denied: Only employers can post jobs.', 'danger')
+        return redirect(url_for('home'))
+
     if request.method == 'POST':
         title = request.form.get('title')
         description = request.form.get('description')
         company = request.form.get('company')
         location = request.form.get('location')
 
-        # Ensure the user ID is included
-        new_job = Job(title=title, description=description, company=company, location=location, user_id=current_user.id, employer_id=current_user.id)
+        new_job = Job(
+            title=title,
+            description=description,
+            company=company,
+            location=location,
+            user_id=current_user.id,
+            employer_id=current_user.id
+        )
+
         db.session.add(new_job)
         db.session.commit()
 
@@ -230,6 +272,7 @@ def post_job():
         return redirect(url_for('employer_dashboard'))
 
     return render_template('post_job.html', UserRole=UserRole)
+
 
 
 @app.route("/apply/<int:job_id>", methods=['GET', 'POST'])

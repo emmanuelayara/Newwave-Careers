@@ -109,6 +109,15 @@ class ProfileForm(FlaskForm):
     submit = SubmitField('Update Profile')
 
 
+class EmployerProfileForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired(), Length(min=3, max=100)])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    bio = TextAreaField('Who are We?')
+    location = StringField('Location')
+    profile_image = FileField('Update Profile Picture', validators=[FileAllowed(['jpg', 'jpeg', 'png', 'gif'])])
+    submit = SubmitField('Update Profile')
+
+
 
 class JobForm(FlaskForm):
     title = StringField('Job Title', validators=[DataRequired(), Length(min=3, max=100)])
