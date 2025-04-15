@@ -169,7 +169,7 @@ def login():
 @login_required
 def profile():
     form = ProfileForm()
-    
+
     if form.validate_on_submit():
         # Update text fields
         current_user.username = form.username.data

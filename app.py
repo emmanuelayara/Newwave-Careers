@@ -13,8 +13,15 @@ def add_header(response):
     return response
 
 
-app.config['UPLOAD_FOLDER'] = os.path.join(app.root_path, 'static/profile_pics')
-app.config['ALLOWED_EXTENSIONS'] = {'png', 'jpg', 'jpeg', 'gif'}
+
+basedir = os.path.abspath(os.path.dirname(__file__))
+
+class Config:
+    UPLOAD_FOLDER = os.path.join(basedir, 'static', 'profile_pics')
+    ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png', 'gif'}
+
+app.config.from_object(Config)
+
 
 # Secret key for session management and CSRF protection
 WTF_CSRF_ENABLED = True
