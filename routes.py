@@ -318,18 +318,42 @@ def apply(job_id):
 
 
 
-@app.route('/employer/delete_job/<int:job_id>')
+@app.route('/edit-job/<int:job_id>', methods=['GET', 'POST'])
+@login_required
+def edit_job(job_id):
+    job = Job.query.get_or_404(job_id)
+
+    # Only allow employers to edit their own job posts
+    if job.employer_id != current_user.id:
+        abort(403)
+
+    if request.method == 'POST':
+        job.title = request.form.get('title')
+        job.description = request.form.get('description')
+        job.company = request.form.get('company')
+        job.location = request.form.get('location')
+
+        db.session.commit()
+        flash('Job updated successfully!', 'success')
+        return redirect(url_for('employer_dashboard'))
+
+    return render_template('edit_job.html', job=job, UserRole=UserRole)
+
+
+@app.route('/delete-job/<int:job_id>', methods=['GET', 'POST'])
 @login_required
 def delete_job(job_id):
-    if not current_user.EMPLOYER:
-        flash("Access denied. employers only.", "danger")
-        return redirect(url_for('Employer_dashboard'))
-
     job = Job.query.get_or_404(job_id)
+
+    # Only allow employers to delete their own job posts
+    if job.employer_id != current_user.id:
+        abort(403)
+
     db.session.delete(job)
     db.session.commit()
-    flash("Job deleted successfully.", "success")
+    flash('Job deleted successfully!', 'success')
     return redirect(url_for('employer_dashboard'))
+
 
 
 @app.route("/jobs")
@@ -348,7 +372,24 @@ def dashboard():
 @app.route("/employer_dashboard")
 @login_required
 def employer_dashboard():
-    return render_template("employer_dashboard.html", UserRole=UserRole)
+    # Ensure only employers can access
+    if current_user.role != UserRole.EMPLOYER:
+        flash('Access denied: Employers only', 'danger')
+        return redirect(url_for('home'))
+
+    # Calculate total applications and total views for the employer's jobs
+    total_applications = sum(len(job.applications) for job in current_user.jobs)
+
+    # Check if views are being tracked in the Job model
+    total_views = sum((job.views or 0) for job in current_user.jobs) if current_user.jobs and hasattr(current_user.jobs[0], 'views') else 0
+
+    return render_template(
+        "employer_dashboard.html",
+        UserRole=UserRole,
+        total_applications=total_applications,
+        total_views=total_views
+    )
+
 
 
 @app.route("/employer_manage_jobs")
