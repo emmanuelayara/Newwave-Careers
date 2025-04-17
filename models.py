@@ -30,6 +30,7 @@ class User(db.Model, UserMixin):
     profile_image = db.Column(db.String(200), nullable=True, default='default.jpg')
 
     # Job Relationships
+    notifications = db.relationship('Notification', backref='receiver', lazy='dynamic')
     applications = db.relationship('Application', backref='applicant', lazy=True)
     saved_jobs = db.relationship('Job', secondary='saved_jobs', backref='saved_by', lazy='dynamic')
 
@@ -112,19 +113,21 @@ class WorkExperience(db.Model):
     description = db.Column(db.Text, nullable=True)
 
 
-
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(
+        db.Integer,
+        db.ForeignKey('user.id', name='fk_notification_user_id'),
+        nullable=False
+    )
     message = db.Column(db.String(255), nullable=False)
-    read = db.Column(db.Boolean, default=False)
+    link = db.Column(db.String(255))
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
+    is_read = db.Column(db.Boolean, default=False)
 
-    # Establish relationship (if not already defined in User model)
-    user = db.relationship('User', backref='notifications', lazy=True)
-
-    def __repr__(self):
-        return f"Notification('{self.message}', Read: {self.read})"
+    def mark_as_read(self):
+        self.read = True
+        db.session.commit()
 
 
 class BlogPost(db.Model):

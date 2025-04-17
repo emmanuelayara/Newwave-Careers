@@ -4,6 +4,8 @@ from flask_bcrypt import Bcrypt  # For hashing passwords
 from flask_login import LoginManager  # Manages user sessions
 from flask_migrate import Migrate
 import os
+from flask_wtf.csrf import CSRFProtect
+
 
 app = Flask(__name__)
 
@@ -12,7 +14,7 @@ def add_header(response):
     response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
     return response
 
-
+csrf = CSRFProtect(app)
 
 basedir = os.path.abspath(os.path.dirname(__file__))
 

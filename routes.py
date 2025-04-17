@@ -102,36 +102,33 @@ def home():
 @app.route('/notifications')
 @login_required
 def notifications():
-    # Retrieve all notifications for the current user, ordered by most recent
-    notifications = Notification.query.filter_by(user_id=current_user.id)\
-                                        .order_by(Notification.timestamp.desc())\
-                                        .all()
-    return render_template('notifications.html', notifications=notifications, UserRole=UserRole)
+    user_notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    return render_template('notifications.html', notifications=user_notifications, UserRole=UserRole)
 
 
-@app.route('/notifications/read/<int:notification_id>')
+@app.route('/notification/<int:notification_id>/read', methods=['POST'])
 @login_required
-def mark_notification_read(notification_id):
+def mark_notification_as_read(notification_id):
     notification = Notification.query.get_or_404(notification_id)
-    # Ensure that the notification belongs to the current user
+
     if notification.user_id != current_user.id:
         abort(403)
+
     notification.read = True
     db.session.commit()
-    flash('Notification marked as read.', 'success')
-    return redirect(url_for('notifications'))
+
+    return jsonify({'status': 'success'})
 
 
-@app.route('/notifications/delete/<int:notification_id>')
+@app.route("/notification/read/<int:notification_id>")
 @login_required
-def delete_notification(notification_id):
+def read_notification(notification_id):
     notification = Notification.query.get_or_404(notification_id)
-    if notification.user_id != current_user.id:
+    if notification.receiver_id != current_user.id:
         abort(403)
-    db.session.delete(notification)
+    notification.is_read = True
     db.session.commit()
-    flash('Notification deleted.', 'success')
-    return redirect(url_for('notifications'))
+    return redirect(notification.link)
 
 
 @app.route("/register", methods=["GET", "POST"])
@@ -271,11 +268,21 @@ def post_job():
         db.session.add(new_job)
         db.session.commit()
 
+        # 🔔 Notify all job seekers about the new job
+        job_seekers = User.query.filter_by(role=UserRole.JOB_SEEKER).all()
+        for seeker in job_seekers:
+            notification = Notification(
+                user_id=seeker.id,
+                message=f"New job posted: {new_job.title}",
+                link=url_for('jobs', job_id=new_job.id)
+            )
+            db.session.add(notification)
+        db.session.commit()
+
         flash('Job posted successfully!', 'success')
         return redirect(url_for('employer_dashboard'))
 
     return render_template('post_job.html', UserRole=UserRole)
-
 
 
 @app.route("/apply/<int:job_id>", methods=['GET', 'POST'])
@@ -314,11 +321,19 @@ def apply(job_id):
         db.session.add(application)
         db.session.commit()
 
+        # 🔔 Notify employer
+        notification = Notification(
+            receiver_id=job.employer_id,
+            message=f"{current_user.username} applied to your job: {job.title}",
+            link=url_for('view_applicants', job_id=job.id)
+        )
+        db.session.add(notification)
+        db.session.commit()
+
         flash("Application submitted successfully!", "success")
         return redirect(url_for('jobs'))
 
     return render_template('apply.html', job=job, form=form, UserRole=UserRole)
-
 
 
 @app.route('/edit-job/<int:job_id>', methods=['GET', 'POST'])

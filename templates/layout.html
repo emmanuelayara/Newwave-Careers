@@ -24,11 +24,50 @@
             <li class="nav-item"><a class="nav-link" href="{{ url_for('blog') }}">Blog & News</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('dashboard') }}">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('jobs') }}">Jobs</a></li>
-            <li class="nav-item"><a class="nav-link" href="{{ url_for('notifications') }}">Notifications</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="{{ url_for('notifications') }}" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Notifications
+                  {% set unread = current_user.notifications|selectattr("is_read", "equalto", False)|list %}
+                  {% if unread|length > 0 %}
+                      <span class="badge bg-danger">{{ unread|length }}</span>
+                  {% endif %}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="max-height: 300px; overflow-y: auto;">
+                {% set sorted_notifications = current_user.notifications | sort(attribute="timestamp", reverse=True) %}
+                {% for n in sorted_notifications[:5] %}
+                  <li onclick="markAsRead({{ n.id }})" style="{{ 'font-weight: bold;' if not n.read else '' }}">
+                    {{ n.message }}
+                  </li>
+                {% endfor %}               
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-center" href="{{ url_for('notifications') }}">View All</a></li>
+              </ul>
+          </li>
+          
           {% elif current_user.role == UserRole.EMPLOYER %}
             <li class="nav-item"><a class="nav-link" href="{{ url_for('blog') }}">Blog & News</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('employer_dashboard') }}">Dashboard</a></li>
             <li class="nav-item"><a class="nav-link" href="{{ url_for('post_job') }}">Post a Job</a></li>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="{{ url_for('notifications') }}" id="notificationDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                  Notifications
+                  {% set unread = current_user.notifications|selectattr("is_read", "equalto", False)|list %}
+                  {% if unread|length > 0 %}
+                      <span class="badge bg-danger">{{ unread|length }}</span>
+                  {% endif %}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="notificationDropdown" style="max-height: 300px; overflow-y: auto;">
+                {% set sorted_notifications = current_user.notifications | sort(attribute="timestamp", reverse=True) %}
+                {% for n in sorted_notifications[:5] %}
+                  <li onclick="markAsRead({{ n.id }})" style="{{ 'font-weight: bold;' if not n.read else '' }}">
+                    {{ n.message }}
+                  </li>
+                {% endfor %}              
+                  <li><hr class="dropdown-divider"></li>
+                  <li><a class="dropdown-item text-center" href="{{ url_for('notifications') }}">View All</a></li>
+              </ul>
+          </li>
+          
             <li class="nav-item"><a class="nav-link" href="{{ url_for('manage_jobs') }}">Manage Jobs</a></li>
           {% endif %}
           {% if current_user.is_admin %}
@@ -119,6 +158,25 @@
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    function markAsRead(notificationId) {
+      fetch(`/notification/${notificationId}/read`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': '{{ csrf_token() }}'  // If using Flask-WTF
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 'success') {
+          location.reload(); // reload the page to update the notification style
+        }
+      });
+    }
+  </script>
+  
+
 </body>
 </html>
 
