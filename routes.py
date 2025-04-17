@@ -1,4 +1,4 @@
-from flask import render_template, url_for, flash, redirect, abort  # Flask utilities
+from flask import render_template, url_for, flash, redirect, abort, jsonify  # Flask utilities
 from app import app, db, bcrypt  # Import app, database, and bcrypt
 from models import User  # Import User model
 from models import Education
@@ -129,6 +129,13 @@ def read_notification(notification_id):
     notification.is_read = True
     db.session.commit()
     return redirect(notification.link)
+
+@app.route('/notification/unread_count')
+@login_required
+def get_unread_notification_count():
+    count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
+    return jsonify({'count': count})
+
 
 
 @app.route("/register", methods=["GET", "POST"])

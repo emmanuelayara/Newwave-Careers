@@ -159,21 +159,24 @@
   <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
   <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
   <script>
-    function markAsRead(notificationId) {
-      fetch(`/notification/${notificationId}/read`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': '{{ csrf_token() }}'  // If using Flask-WTF
-        }
-      })
-      .then(response => response.json())
+fetch(`/notification/${notificationId}/read`, {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  }
+}).then(response => {
+  if (response.ok) {
+    // Update the UI immediately (optional)
+    document.getElementById(`notification-${notificationId}`).classList.add('read');
+
+    // Now update the count in the navbar
+    fetch('/notification/unread_count')
+      .then(res => res.json())
       .then(data => {
-        if (data.status === 'success') {
-          location.reload(); // reload the page to update the notification style
-        }
+        document.getElementById('notification-count').innerText = data.count;
       });
-    }
+  }
+});
   </script>
   
 
