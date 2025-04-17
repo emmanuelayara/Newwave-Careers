@@ -1,0 +1,40 @@
+{% extends "layout.html" %}
+{% block content %}
+<h2 class="mb-4">Add Pre-Interview Test for "{{ job.title }}"</h2>
+
+<form method="POST">
+    {{ form.hidden_tag() }}
+    {% for question_form in form.questions %}
+        <div class="card mb-3 p-3 shadow-sm">
+            <div class="mb-2">
+                <label class="form-label small">{{ question_form.question.label }}</label>
+                {{ question_form.question(class="form-control form-control-sm", rows="2") }}
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <label class="form-label small">{{ question_form.option_a.label }}</label>
+                    {{ question_form.option_a(class="form-control form-control-sm") }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small">{{ question_form.option_b.label }}</label>
+                    {{ question_form.option_b(class="form-control form-control-sm") }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small">{{ question_form.option_c.label }}</label>
+                    {{ question_form.option_c(class="form-control form-control-sm") }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label small">{{ question_form.option_d.label }}</label>
+                    {{ question_form.option_d(class="form-control form-control-sm") }}
+                </div>
+            </div>
+            <div class="mt-2">
+                <label class="form-label small">{{ question_form.correct_option.label }}</label>
+                {{ question_form.correct_option(class="form-select form-select-sm") }}
+            </div>
+        </div>
+    {% endfor %}
+    
+    <button type="submit" class="btn btn-success">Submit Test</button>
+</form>
+{% endblock %}

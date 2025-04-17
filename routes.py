@@ -17,6 +17,9 @@ from models import BlogPost
 from models import UserRole
 from forms import RegistrationForm
 from forms import EmployerProfileForm
+from forms import QuestionForm
+from forms import AddTestForm
+from models import PreInterviewTest
 from flask import render_template, Response
 from xhtml2pdf import pisa
 from flask import render_template, flash, redirect, url_for, request
@@ -391,26 +394,51 @@ def employer_dashboard():
     )
 
 
-
-@app.route("/employer_manage_jobs")
-@login_required
-def employer_manage_jobs():
-    return render_template("manage_jobs.html", UserRole=UserRole)
-
-
 @app.route('/manage_jobs')
 @login_required
 def manage_jobs():
-    print(f"Current User: {current_user.username}, Role: {current_user.role}")  # Debugging
+    if current_user.role != UserRole.EMPLOYER:
+        abort(403)
 
-    if current_user.role != 'EMPLOYER':  # Ensure only employers access this
-        print("Redirecting to home: User is not an employer.")  # Debugging
-        return redirect(url_for('employer_manage_jobs'))
-
-    jobs = Job.query.filter_by(employer_id=current_user.id).all()  
-    job_applications = {job.id: Application.query.filter_by(job_id=job.id).all() for job in jobs}  
+    jobs = Job.query.filter_by(employer_id=current_user.id).all()
+    
+    job_applications = {}
+    for job in jobs:
+        job_applications[job.id] = len(job.applications)  # assuming job.applications is a relationship
 
     return render_template('manage_jobs.html', jobs=jobs, job_applications=job_applications, UserRole=UserRole)
+
+
+@app.route('/add_test/<int:job_id>', methods=['GET', 'POST'])
+@login_required
+def add_test(job_id):
+    job = Job.query.get_or_404(job_id)
+
+    if job.employer_id != current_user.id:
+        abort(403)
+
+    form = AddTestForm()
+
+    if form.validate_on_submit():
+        for question_form in form.questions:
+            question = PreInterviewTest(
+                job_id=job_id,
+                question=question_form.question.data,
+                option_a=question_form.option_a.data,
+                option_b=question_form.option_b.data,
+                option_c=question_form.option_c.data,
+                option_d=question_form.option_d.data,
+                correct_option=question_form.correct_option.data
+            )
+            db.session.add(question)
+
+        db.session.commit()
+        flash('Pre-interview test added successfully!', 'success')
+        return redirect(url_for('manage_jobs'))
+
+    return render_template('add_test.html', form=form, job=job, UserRole=UserRole)
+
+
 
 
 

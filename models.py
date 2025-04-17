@@ -134,3 +134,19 @@ class BlogPost(db.Model):
     content = db.Column(db.Text, nullable=False)
     author = db.Column(db.String(100), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+
+    # models.py
+
+class PreInterviewTest(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    question = db.Column(db.Text, nullable=False)
+    option_a = db.Column(db.String(255), nullable=False)
+    option_b = db.Column(db.String(255), nullable=False)
+    option_c = db.Column(db.String(255), nullable=False)
+    option_d = db.Column(db.String(255), nullable=False)
+    correct_option = db.Column(db.String(1), nullable=False)  # A, B, C, or D
+
+    job = db.relationship('Job', backref=db.backref('pre_interview_tests', lazy=True))
+

@@ -24,6 +24,9 @@ from flask_wtf import FlaskForm
 from wtforms import TextAreaField, SubmitField
 from flask_wtf.file import FileField, FileAllowed, FileRequired
 from wtforms.validators import DataRequired
+from flask_wtf import FlaskForm
+from wtforms import StringField, SelectField, SubmitField
+from wtforms.validators import DataRequired
 
 
 
@@ -67,7 +70,7 @@ class RegistrationForm(FlaskForm):
 class EducationForm(FlaskForm):
     degree = StringField("Degree", validators=[DataRequired()])
     institution = StringField("Institution", validators=[DataRequired()])
-    year = StringField("Year", validators=[DataRequired()])
+    year = StringField("Year of Graduation", validators=[DataRequired()])
 
 class WorkExperienceForm(FlaskForm):
     job_title = StringField("Job Title", validators=[DataRequired()])
@@ -125,3 +128,16 @@ class JobForm(FlaskForm):
     location = StringField('Location', validators=[DataRequired(), Length(min=2, max=100)])
     description = TextAreaField('Job Description', validators=[DataRequired(), Length(min=10)])
     submit = SubmitField('Submit')
+
+
+class QuestionForm(FlaskForm):
+    question = TextAreaField('Question', validators=[DataRequired()])
+    option_a = StringField('Option A', validators=[DataRequired()])
+    option_b = StringField('Option B', validators=[DataRequired()])
+    option_c = StringField('Option C', validators=[DataRequired()])
+    option_d = StringField('Option D', validators=[DataRequired()])
+    correct_option = SelectField('Correct Option', choices=[('A', 'A'), ('B', 'B'), ('C', 'C'), ('D', 'D')], validators=[DataRequired()])
+
+class AddTestForm(FlaskForm):
+    questions = FieldList(FormField(QuestionForm), min_entries=1)
+    submit = SubmitField('Submit Test')
