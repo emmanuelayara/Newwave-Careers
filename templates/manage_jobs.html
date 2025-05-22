@@ -5,6 +5,8 @@
 <div class="container mt-4">
     <h2 class="mb-4">Manage Jobs</h2>
 
+    
+
     {% if jobs %}
         <div class="row">
             {% for job in jobs %}
@@ -15,16 +17,18 @@
                             <p class="card-text">{{ job.description }}</p>
                             <p class="text-muted">Posted on: {{ job.date_posted.strftime('%B %d, %Y') }}</p>
 
+
+
                             <div class="mt-3">
                                 <h5>Applications:</h5>
                                 {% if job_applications[job.id] %}
                                     <ul class="list-group mb-3">
-                                        {% for application in job_applications[job.id] %}
-                                            <li class="list-group-item">
-                                                <strong>Applicant:</strong> {{ application.user.name }} <br>
-                                                <strong>Applied on:</strong> {{ application.date_applied.strftime('%B %d, %Y') }}
-                                            </li>
-                                        {% endfor %}
+                                    {% for application in job_applications[job.id] %}
+                                        <li class="list-group-item">
+                                            <strong>Applicant:</strong> {{ application.applicant.username }} <br>
+                                            <strong>Applied on:</strong> {{ application.date_applied.strftime('%B %d, %Y') }}
+                                        </li>
+                                    {% endfor %}                                    
                                     </ul>
                                 {% else %}
                                     <p class="text-muted">No applications yet.</p>

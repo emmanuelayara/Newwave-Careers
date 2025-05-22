@@ -1,0 +1,25 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3>Applicants for: {{ job.title }}</h3>
+
+    {% if applicants %}
+        <ul class="list-group mt-3">
+            {% for application in applicants %}
+                <li class="list-group-item">
+                    <strong>{{ application.user.name }}</strong> —
+                    {{ application.user.email }}<br>
+                    Applied on: {{ application.date_applied.strftime('%Y-%m-%d') }}
+                    
+                    {% if application.resume %}
+                        <br><a href="{{ url_for('static', filename='resumes/' ~ application.resume) }}" target="_blank">View Resume</a>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="mt-3">No applicants yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

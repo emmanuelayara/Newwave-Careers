@@ -330,7 +330,7 @@ def apply(job_id):
 
         # 🔔 Notify employer
         notification = Notification(
-            receiver_id=job.employer_id,
+            user_id=job.employer_id,
             message=f"{current_user.username} applied to your job: {job.title}",
             link=url_for('view_applicants', job_id=job.id)
         )
@@ -341,6 +341,22 @@ def apply(job_id):
         return redirect(url_for('jobs'))
 
     return render_template('apply.html', job=job, form=form, UserRole=UserRole)
+
+
+@app.route('/employer/applicants/<int:job_id>')
+@login_required
+def view_applicants(job_id):
+    job = Job.query.get_or_404(job_id)
+
+    # Only allow the employer who posted the job to view applicants
+    if current_user.id != job.employer_id:
+        flash('You are not authorized to view applicants for this job.', 'danger')
+        return redirect(url_for('employer_dashboard'))
+
+    applicants = Application.query.filter_by(job_id=job_id).all()
+
+    return render_template('view_applicants.html', job=job, applicants=applicants, UserRole=UserRole)
+
 
 
 @app.route('/edit-job/<int:job_id>', methods=['GET', 'POST'])
@@ -374,11 +390,13 @@ def delete_job(job_id):
     if job.employer_id != current_user.id:
         abort(403)
 
+    # Delete all related applications
+    Application.query.filter_by(job_id=job.id).delete()
+
     db.session.delete(job)
     db.session.commit()
     flash('Job deleted successfully!', 'success')
     return redirect(url_for('employer_dashboard'))
-
 
 
 @app.route("/jobs")
@@ -426,7 +444,7 @@ def manage_jobs():
     
     job_applications = {}
     for job in jobs:
-        job_applications[job.id] = len(job.applications)  # assuming job.applications is a relationship
+        job_applications[job.id] = job.applications  # assuming job.applications is a relationship
 
     return render_template('manage_jobs.html', jobs=jobs, job_applications=job_applications, UserRole=UserRole)
 
