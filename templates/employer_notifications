@@ -1,0 +1,33 @@
+{% extends "layout.html" %}
+
+{% block title %}Employer Notifications{% endblock %}
+
+{% block content %}
+<h2>Notifications</h2>
+
+{% if notifications %}
+    <ul>
+    {% for note in notifications %}
+        <li style="margin-bottom: 20px;">
+            <strong {% if not note.is_read %}style="color: red;"{% endif %}>{{ note.message }}</strong><br>
+            <small>{{ note.timestamp.strftime('%Y-%m-%d %H:%M') }}</small><br>
+
+            {% if not note.is_read %}
+                <form method="post" action="{{ url_for('employer.mark_notification_as_read', notification_id=note.id) }}" style="display:inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit">Mark as Read</button>
+                </form>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('employer.delete_notification', notification_id=note.id) }}" style="display:inline;">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button type="submit">Delete</button>
+            </form>
+        </li>
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No notifications found.</p>
+{% endif %}
+
+{% endblock %}

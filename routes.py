@@ -99,6 +99,41 @@ def home():
     return render_template("home.html", title="Home", UserRole=UserRole)
 
 
+
+app.route('/notifications')
+@login_required
+def employer_notifications():
+    # Fetch notifications for current employer user, newest first
+    notifications = Notification.query.filter_by(user_id=current_user.id).order_by(Notification.timestamp.desc()).all()
+    return render_template('employer_notifications.html', notifications=notifications)
+
+app.route('/notifications/read/<int:notification_id>', methods=['POST'])
+@login_required
+def mark_notification_as_read(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    if notification.user_id != current_user.id:
+        flash("You can't mark this notification.", "danger")
+        return redirect(url_for('employer_notifications'))
+
+    notification.is_read = True
+    db.session.commit()
+    flash('Notification marked as read.', 'success')
+    return redirect(url_for('employer_notifications'))
+
+app.route('/notifications/delete/<int:notification_id>', methods=['POST'])
+@login_required
+def delete_notification(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    if notification.user_id != current_user.id:
+        flash("You can't delete this notification.", "danger")
+        return redirect(url_for('employer_notifications'))
+
+    db.session.delete(notification)
+    db.session.commit()
+    flash('Notification deleted.', 'success')
+    return redirect(url_for('employer_notifications'))
+
+
 @app.route('/notifications')
 @login_required
 def notifications():
@@ -106,36 +141,37 @@ def notifications():
     return render_template('notifications.html', notifications=user_notifications, UserRole=UserRole)
 
 
-@app.route('/notification/<int:notification_id>/read', methods=['POST'])
+@app.route('/notifications/read/<int:notification_id>', methods=['POST'])
 @login_required
 def mark_notification_as_read(notification_id):
     notification = Notification.query.get_or_404(notification_id)
-
     if notification.user_id != current_user.id:
         abort(403)
-
     notification.read = True
     db.session.commit()
+    return redirect(request.referrer or url_for('dashboard'))
 
-    return jsonify({'status': 'success'})
 
-
-@app.route("/notification/read/<int:notification_id>")
+@app.route('/notifications/read-all', methods=['POST'])
 @login_required
-def read_notification(notification_id):
-    notification = Notification.query.get_or_404(notification_id)
-    if notification.receiver_id != current_user.id:
-        abort(403)
-    notification.is_read = True
+def mark_all_notifications_as_read():
+    notifications = Notification.query.filter_by(user_id=current_user.id, read=False).all()
+    for note in notifications:
+        note.read = True
     db.session.commit()
-    return redirect(notification.link)
+    return redirect(request.referrer or url_for('dashboard'))
 
-@app.route('/notification/unread_count')
+
+
+@app.route('/notifications/delete/<int:notification_id>', methods=['POST'])
 @login_required
-def get_unread_notification_count():
-    count = Notification.query.filter_by(user_id=current_user.id, is_read=False).count()
-    return jsonify({'count': count})
-
+def delete_notification(notification_id):
+    notification = Notification.query.get_or_404(notification_id)
+    if notification.user_id != current_user.id:
+        abort(403)
+    db.session.delete(notification)
+    db.session.commit()
+    return redirect(request.referrer or url_for('dashboard'))
 
 
 @app.route("/register", methods=["GET", "POST"])

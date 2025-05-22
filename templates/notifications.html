@@ -2,13 +2,20 @@
 
 {% block content %}
 <h2>Notifications</h2>
-<ul>
-  {% for n in notifications %}
-    <li style="margin-bottom: 10px;">
-      {% if not n.is_read %}<strong>{% endif %}
-      <a href="{{ n.link }}">{{ n.message }}</a> — {{ n.timestamp.strftime('%Y-%m-%d %H:%M') }}
-      {% if not n.is_read %}</strong>{% endif %}
-    </li>
-  {% endfor %}
-</ul>
+{% for note in notifications %}
+    <div class="{% if note.read %}text-muted{% else %}font-weight-bold{% endif %}">
+        {{ note.message }}
+        <form action="{{ url_for('mark_notification_as_read', notification_id=note.id) }}" method="post" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Mark as Read</button>
+        </form>
+        <form action="{{ url_for('delete_notification', notification_id=note.id) }}" method="post" style="display:inline;">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button type="submit">Delete</button>
+        </form>
+    </div>
+{% endfor %}
 {% endblock %}
+
+
+

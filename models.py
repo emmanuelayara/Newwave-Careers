@@ -115,19 +115,11 @@ class WorkExperience(db.Model):
 
 class Notification(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(
-        db.Integer,
-        db.ForeignKey('user.id', name='fk_notification_user_id'),
-        nullable=False
-    )
-    message = db.Column(db.String(255), nullable=False)
-    link = db.Column(db.String(255))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    message = db.Column(db.String(500))
+    read = db.Column(db.Boolean, default=False)
     timestamp = db.Column(db.DateTime, default=datetime.utcnow)
-    is_read = db.Column(db.Boolean, default=False)
 
-    def mark_as_read(self):
-        self.read = True
-        db.session.commit()
 
 
 class BlogPost(db.Model):
