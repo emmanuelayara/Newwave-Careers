@@ -99,7 +99,6 @@ def home():
     return render_template("home.html", title="Home", UserRole=UserRole)
 
 
-
 app.route('/notifications')
 @login_required
 def employer_notifications():
@@ -317,7 +316,6 @@ def post_job():
             notification = Notification(
                 user_id=seeker.id,
                 message=f"New job posted: {new_job.title}",
-                link=url_for('jobs', job_id=new_job.id)
             )
             db.session.add(notification)
         db.session.commit()
@@ -368,7 +366,6 @@ def apply(job_id):
         notification = Notification(
             user_id=job.employer_id,
             message=f"{current_user.username} applied to your job: {job.title}",
-            link=url_for('view_applicants', job_id=job.id)
         )
         db.session.add(notification)
         db.session.commit()
@@ -519,64 +516,103 @@ def add_test(job_id):
 
 
 
-
-
 @app.route("/resume", methods=["GET", "POST"])
+@login_required
 def resume():
     form = ResumeForm()
-    
+
+    # Fetch existing resume if it exists
+    resume = Resume.query.filter_by(user_id=current_user.id).order_by(Resume.id.desc()).first()
+
     if request.method == "GET":
-        if not form.education.data:
-            form.education.append_entry()
-        if not form.experience.data:
-            form.experience.append_entry()
+        if resume:
+            # Populate personal details
+            form.full_name.data = resume.full_name
+            form.phone.data = resume.phone
+            form.email.data = resume.email
+            form.profile_summary.data = resume.profile_summary
+            form.key_skills.data = resume.key_skills
+            form.activities_interests.data = resume.activities_interests
+
+            # Populate education
+            form.education.entries = []  # Clear default entries
+            for edu in resume.education:
+                form.education.append_entry({
+                    'degree': edu.degree,
+                    'institution': edu.institution,
+                    'year': edu.year
+                })
+
+            # Populate experience
+            form.experience.entries = []  # Clear default entries
+            for exp in resume.experience:
+                form.experience.append_entry({
+                    'job_title': exp.job_title,
+                    'company': exp.company,
+                    'location': exp.location,
+                    'start_year': exp.start_year,
+                    'end_year': exp.end_year,
+                    'description': exp.description
+                })
+        else:
+            # Add one blank entry if no existing data
+            if not form.education.data:
+                form.education.append_entry()
+            if not form.experience.data:
+                form.experience.append_entry()
 
     if form.validate_on_submit():
-        flash("Form validated successfully!", "info")
-    else:
-        print(form.errors)  # Add this line
-        if request.method == "POST":
-            resume = Resume(
-                user_id=current_user.id,
-                full_name=form.full_name.data,
-                phone=form.phone.data,
-                email=form.email.data,
-                profile_summary=form.profile_summary.data,
-                activities_interests=form.activities_interests.data,
-                key_skills=form.key_skills.data
+        # If editing existing resume, delete previous one
+        if resume:
+            Education.query.filter_by(resume_id=resume.id).delete()
+            WorkExperience.query.filter_by(resume_id=resume.id).delete()
+            db.session.delete(resume)
+            db.session.commit()
+
+        # Create new resume
+        resume = Resume(
+            user_id=current_user.id,
+            full_name=form.full_name.data,
+            phone=form.phone.data,
+            email=form.email.data,
+            profile_summary=form.profile_summary.data,
+            activities_interests=form.activities_interests.data,
+            key_skills=form.key_skills.data
+        )
+        db.session.add(resume)
+        db.session.commit()
+
+        # Add new education
+        for edu in form.education.data:
+            education = Education(
+                degree=edu["degree"],
+                institution=edu["institution"],
+                year=edu["year"],
+                resume_id=resume.id
             )
-            db.session.add(resume)
-            db.session.commit()
+            db.session.add(education)
 
-            # Add Education Entries
-            for edu in form.education.data:
-                education = Education(
-                    degree=edu["degree"],
-                    institution=edu["institution"],
-                    year=edu["year"],
-                    resume_id=resume.id
-                )
-                db.session.add(education)
+        # Add new work experience
+        for exp in form.experience.data:
+            experience = WorkExperience(
+                job_title=exp["job_title"],
+                company=exp["company"],
+                location=exp["location"],
+                start_year=exp["start_year"],
+                end_year=exp["end_year"],
+                description=exp["description"],
+                resume_id=resume.id
+            )
+            db.session.add(experience)
 
-            # Add Work Experience Entries
-            for exp in form.experience.data:
-                experience = WorkExperience(
-                    job_title=exp["job_title"],
-                    company=exp["company"],
-                    location=exp["location"],
-                    start_year=exp["start_year"],
-                    end_year=exp["end_year"],
-                    description=exp["description"],
-                    resume_id=resume.id
-                )
-                db.session.add(experience)
+        db.session.commit()
+        flash("Resume saved successfully!", "success")
+        return redirect(url_for("resume_preview"))
+    else:
+        print(form.errors)
 
-            db.session.commit()
-            flash("Resume saved successfully!", "success")
-           
-            return redirect(url_for("resume_preview"))
-    
     return render_template("resume.html", form=form, UserRole=UserRole)
+
 
 
 @app.route("/resume/preview")

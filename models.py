@@ -77,8 +77,9 @@ class Application(db.Model):
     other_documents = db.Column(db.String(255), nullable=True)  # Optional file path
     date_applied = db.Column(db.DateTime, default=datetime.utcnow)
 
-job = db.relationship('Job', backref=db.backref('job_applications', lazy=True), lazy=True)
-user = db.relationship('User', backref=db.backref('user_applications', lazy=True), lazy=True)
+    job = db.relationship('Job', backref=db.backref('job_applications', lazy=True), lazy=True)
+    user = db.relationship('User', backref=db.backref('user_applications', lazy=True), lazy=True)
+
 
 
 class Resume(db.Model):
