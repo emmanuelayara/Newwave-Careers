@@ -34,17 +34,31 @@
     <div class="card mb-3">
       <div class="card-body">
         <h4 class="card-title">Application History</h4>
-        {% if current_user.user_applications %}
-          <ul class="list-group">
-            {% for app in current_user.user_applications %}
-              <li class="list-group-item">
-                <strong>{{ app.job.title }}</strong> at {{ app.job.company }} on {{ app.date_applied.strftime("%Y-%m-%d") }}
-              </li>
-            {% endfor %}
-          </ul>
+        {% if applications %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Applied On</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for application in applications %}
+                    <tr>
+                        <td>{{ application.job.title }}</td>
+                        <td>{{ application.job.company_name }}</td> <!-- adjust field names -->
+                        <td>{{ application.date_applied.strftime('%Y-%m-%d') }}</td>
+                        <td>{{ application.status }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         {% else %}
-          <p>No applications found.</p>
+            <p>You have not applied to any jobs yet.</p>
         {% endif %}
+        
       </div>
     </div>
     <div class="card">

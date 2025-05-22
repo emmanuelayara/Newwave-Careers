@@ -445,7 +445,10 @@ def jobs():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    return render_template("dashboard.html", UserRole=UserRole)
+
+    applications = current_user.applications.order_by(Application.date_applied.desc()).all()
+
+    return render_template("dashboard.html", UserRole=UserRole, applications=applications)
 
 
 @app.route("/employer_dashboard")

@@ -31,7 +31,7 @@ class User(db.Model, UserMixin):
 
     # Job Relationships
     notifications = db.relationship('Notification', backref='receiver', lazy='dynamic')
-    applications = db.relationship('Application', backref='applicant', lazy=True)
+    applications = db.relationship('Application', backref='applicant', lazy='dynamic')
     saved_jobs = db.relationship('Job', secondary='saved_jobs', backref='saved_by', lazy='dynamic')
 
     def get_profile_image(self):
