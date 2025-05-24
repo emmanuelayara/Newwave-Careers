@@ -76,7 +76,6 @@ from flask import render_template, flash, redirect, url_for, abort
 from flask_login import login_required, current_user
 from models import Notification
 from werkzeug.utils import secure_filename
-
 import os
 from flask import request, flash, redirect, url_for
 from werkzeug.utils import secure_filename
