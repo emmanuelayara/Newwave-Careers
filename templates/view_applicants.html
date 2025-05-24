@@ -17,10 +17,10 @@
   <tbody>
     {% for application in applications %}
     <tr>
-      <td>{{ application.user.full_name }}</td>
+      <td>{{ application.user.username }}</td>
       <td>{{ application.user.email }}</td>
       <td>
-        <a href="{{ url_for('resume_preview_by_id', resume_id=application.resume_id) }}" target="_blank">View Resume</a>
+<a href="{{ url_for('resume_preview_by_id', resume_id=application.resume.id) }}" target="_blank">View Resume</a>
       </td>
       <td>{{ application.status }}</td>
       <td>

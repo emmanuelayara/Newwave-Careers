@@ -1,8 +1,8 @@
 """initial
 
-Revision ID: bb7ef4aefe21
+Revision ID: 7b61d5a6a88d
 Revises: 
-Create Date: 2025-04-17 17:20:37.869929
+Create Date: 2025-05-24 15:07:00.004412
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'bb7ef4aefe21'
+revision = '7b61d5a6a88d'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -60,12 +60,11 @@ def upgrade():
     )
     op.create_table('notification',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('message', sa.String(length=255), nullable=False),
-    sa.Column('link', sa.String(length=255), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.Column('message', sa.String(length=500), nullable=True),
+    sa.Column('read', sa.Boolean(), nullable=True),
     sa.Column('timestamp', sa.DateTime(), nullable=True),
-    sa.Column('is_read', sa.Boolean(), nullable=True),
-    sa.ForeignKeyConstraint(['user_id'], ['user.id'], name='fk_notification_user_id'),
+    sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('resume',
@@ -84,11 +83,14 @@ def upgrade():
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('job_id', sa.Integer(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('resume_id', sa.Integer(), nullable=True),
     sa.Column('cover_letter', sa.String(length=255), nullable=False),
     sa.Column('upload_resume', sa.String(length=255), nullable=False),
     sa.Column('other_documents', sa.String(length=255), nullable=True),
     sa.Column('date_applied', sa.DateTime(), nullable=True),
+    sa.Column('status', sa.String(length=20), nullable=False),
     sa.ForeignKeyConstraint(['job_id'], ['job.id'], ),
+    sa.ForeignKeyConstraint(['resume_id'], ['resume.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )

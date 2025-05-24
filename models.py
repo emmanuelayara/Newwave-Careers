@@ -17,6 +17,23 @@ class UserRole(Enum):
     EMPLOYER = "EMPLOYER"
     ADMIN = "ADMIN"
 
+class Application(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    resume_id = db.Column(db.Integer, db.ForeignKey('resume.id'), nullable=True)
+    cover_letter = db.Column(db.String(255), nullable=False)
+    upload_resume = db.Column(db.String(255), nullable=False)
+    other_documents = db.Column(db.String(255), nullable=True)
+    date_applied = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(20), nullable=False, default='Pending')
+
+    job = db.relationship('Job', backref=db.backref('applications', lazy='dynamic'))
+    user = db.relationship('User', backref=db.backref('applications', lazy='dynamic'))
+    resume = db.relationship('Resume', backref='applications')
+
+
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
@@ -25,13 +42,10 @@ class User(db.Model, UserMixin):
     is_admin = db.Column(db.Boolean, default=False)
     bio = db.Column(db.Text, nullable=True)
     location = db.Column(db.String(100), nullable=True)
-    applications = db.relationship('Application', backref='user_applications', lazy=True)  # Link Applications
     role = db.Column(db.Enum(UserRole), nullable=False, default=UserRole.JOB_SEEKER)
     profile_image = db.Column(db.String(200), nullable=True, default='default.jpg')
 
-    # Job Relationships
     notifications = db.relationship('Notification', backref='receiver', lazy='dynamic')
-    applications = db.relationship('Application', backref='applicant', lazy='dynamic')
     saved_jobs = db.relationship('Job', secondary='saved_jobs', backref='saved_by', lazy='dynamic')
 
     def get_profile_image(self):
@@ -56,7 +70,6 @@ class Job(db.Model):
     views = db.Column(db.Integer, default=0)
     date_posted = db.Column(db.DateTime, default=datetime.utcnow)
     
-    applications = db.relationship('Application', backref='job_applications', lazy=True)
     
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     employer_id = db.Column(db.Integer, db.ForeignKey('user.id', name='fk_job_employer_id'), nullable=False)
@@ -66,20 +79,6 @@ class Job(db.Model):
 
     def __repr__(self):
         return f"Job('{self.title}', '{self.company}')"
-
-
-class Application(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    job_id = db.Column(db.Integer, db.ForeignKey('job.id'), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    cover_letter = db.Column(db.String(255), nullable=False)  # Store file path
-    upload_resume = db.Column(db.String(255), nullable=False)  # Store file path
-    other_documents = db.Column(db.String(255), nullable=True)  # Optional file path
-    date_applied = db.Column(db.DateTime, default=datetime.utcnow)
-
-    job = db.relationship('Job', backref=db.backref('job_applications', lazy=True), lazy=True)
-    user = db.relationship('User', backref=db.backref('user_applications', lazy=True), lazy=True)
-
 
 
 class Resume(db.Model):

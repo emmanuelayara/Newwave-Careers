@@ -354,6 +354,7 @@ def apply(job_id):
         application = Application(
             job_id=job.id,
             user_id=current_user.id,
+            resume_id=resume.id,
             cover_letter=cover_letter_text,
             upload_resume=resume_path,
             other_documents=other_docs_path
@@ -388,6 +389,7 @@ def view_applicants(job_id):
     applicants = Application.query.filter_by(job_id=job_id).all()
 
     return render_template('view_applicants.html', job=job, applicants=applicants, UserRole=UserRole)
+
 
 
 @app.route("/application/<int:app_id>/status", methods=["POST"])
