@@ -390,6 +390,28 @@ def view_applicants(job_id):
     return render_template('view_applicants.html', job=job, applicants=applicants, UserRole=UserRole)
 
 
+@app.route("/application/<int:app_id>/status", methods=["POST"])
+@login_required
+def update_application_status(app_id):
+    application = Application.query.get_or_404(app_id)
+    job = Job.query.get(application.job_id)
+
+    # Only the job's employer can update status
+    if job.employer_id != current_user.id:
+        flash("Unauthorized!", "danger")
+        return redirect(url_for("employer_dashboard"))
+
+    new_status = request.form.get("status")
+    if new_status in ["Pending", "Shortlisted", "Rejected"]:
+        application.status = new_status
+        db.session.commit()
+        flash("Application status updated!", "success")
+    else:
+        flash("Invalid status!", "danger")
+
+    return redirect(url_for("view_applicants", job_id=application.job_id))
+
+
 
 @app.route('/edit-job/<int:job_id>', methods=['GET', 'POST'])
 @login_required
@@ -623,6 +645,16 @@ def resume_preview():
         flash("You have not created a resume yet.", "warning")
         return redirect(url_for("resume"))
     
+    education = Education.query.filter_by(resume_id=resume.id).all()
+    experience = WorkExperience.query.filter_by(resume_id=resume.id).all()
+
+    return render_template("resume_preview.html", resume=resume, education=education, experience=experience, UserRole=UserRole)
+
+
+@app.route("/resume/<int:resume_id>/preview")
+@login_required
+def resume_preview_by_id(resume_id):
+    resume = Resume.query.get_or_404(resume_id)
     education = Education.query.filter_by(resume_id=resume.id).all()
     experience = WorkExperience.query.filter_by(resume_id=resume.id).all()
 
