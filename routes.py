@@ -480,7 +480,8 @@ def employer_dashboard():
         return redirect(url_for('home'))
 
     # Calculate total applications and total views for the employer's jobs
-    total_applications = sum(len(job.applications) for job in current_user.jobs)
+    total_applications = sum(job.applications.count() for job in current_user.jobs)
+
 
     # Check if views are being tracked in the Job model
     total_views = sum((job.views or 0) for job in current_user.jobs) if current_user.jobs and hasattr(current_user.jobs[0], 'views') else 0
