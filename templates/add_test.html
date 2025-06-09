@@ -2,39 +2,94 @@
 {% block content %}
 <h2 class="mb-4">Add Pre-Interview Test for "{{ job.title }}"</h2>
 
-<form method="POST">
+<form method="POST" id="testForm">
     {{ form.hidden_tag() }}
-    {% for question_form in form.questions %}
-        <div class="card mb-3 p-3 shadow-sm">
+    <div id="question-list">
+        {% for question_form in form.questions %}
+            <div class="card mb-3 p-3 shadow-sm question-block">
+                <div class="mb-2">
+                    <label class="form-label small">{{ question_form.question.label }}</label>
+                    {{ question_form.question(class="form-control form-control-sm", rows="2") }}
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6">
+                        <label class="form-label small">{{ question_form.option_a.label }}</label>
+                        {{ question_form.option_a(class="form-control form-control-sm") }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">{{ question_form.option_b.label }}</label>
+                        {{ question_form.option_b(class="form-control form-control-sm") }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">{{ question_form.option_c.label }}</label>
+                        {{ question_form.option_c(class="form-control form-control-sm") }}
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small">{{ question_form.option_d.label }}</label>
+                        {{ question_form.option_d(class="form-control form-control-sm") }}
+                    </div>
+                </div>
+                <div class="mt-2">
+                    <label class="form-label small">{{ question_form.correct_option.label }}</label>
+                    {{ question_form.correct_option(class="form-select form-select-sm") }}
+                </div>
+                <button type="button" class="btn btn-danger btn-sm mt-2 remove-question">Remove</button>
+            </div>
+        {% endfor %}
+    </div>
+
+    <button type="button" id="add-question" class="btn btn-outline-primary mb-3">+ Add Another Question</button>
+    <button type="submit" class="btn btn-success">Submit Test</button>
+</form>
+
+<!-- JavaScript for dynamic fields -->
+<script>
+    document.getElementById('add-question').addEventListener('click', function () {
+        const questionList = document.getElementById('question-list');
+        const count = questionList.children.length;
+        const template = `
+        <div class="card mb-3 p-3 shadow-sm question-block">
             <div class="mb-2">
-                <label class="form-label small">{{ question_form.question.label }}</label>
-                {{ question_form.question(class="form-control form-control-sm", rows="2") }}
+                <label class="form-label small">Question</label>
+                <textarea name="questions-${count}-question" class="form-control form-control-sm" rows="2"></textarea>
             </div>
             <div class="row g-2">
                 <div class="col-md-6">
-                    <label class="form-label small">{{ question_form.option_a.label }}</label>
-                    {{ question_form.option_a(class="form-control form-control-sm") }}
+                    <label class="form-label small">Option A</label>
+                    <input name="questions-${count}-option_a" class="form-control form-control-sm">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label small">{{ question_form.option_b.label }}</label>
-                    {{ question_form.option_b(class="form-control form-control-sm") }}
+                    <label class="form-label small">Option B</label>
+                    <input name="questions-${count}-option_b" class="form-control form-control-sm">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label small">{{ question_form.option_c.label }}</label>
-                    {{ question_form.option_c(class="form-control form-control-sm") }}
+                    <label class="form-label small">Option C</label>
+                    <input name="questions-${count}-option_c" class="form-control form-control-sm">
                 </div>
                 <div class="col-md-6">
-                    <label class="form-label small">{{ question_form.option_d.label }}</label>
-                    {{ question_form.option_d(class="form-control form-control-sm") }}
+                    <label class="form-label small">Option D</label>
+                    <input name="questions-${count}-option_d" class="form-control form-control-sm">
                 </div>
             </div>
             <div class="mt-2">
-                <label class="form-label small">{{ question_form.correct_option.label }}</label>
-                {{ question_form.correct_option(class="form-select form-select-sm") }}
+                <label class="form-label small">Correct Option</label>
+                <select name="questions-${count}-correct_option" class="form-select form-select-sm">
+                    <option value="A">A</option>
+                    <option value="B">B</option>
+                    <option value="C">C</option>
+                    <option value="D">D</option>
+                </select>
             </div>
+            <button type="button" class="btn btn-danger btn-sm mt-2 remove-question">Remove</button>
         </div>
-    {% endfor %}
-    
-    <button type="submit" class="btn btn-success">Submit Test</button>
-</form>
+        `;
+        questionList.insertAdjacentHTML('beforeend', template);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (e.target && e.target.classList.contains('remove-question')) {
+            e.target.closest('.question-block').remove();
+        }
+    });
+</script>
 {% endblock %}

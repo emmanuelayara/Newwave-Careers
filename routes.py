@@ -519,6 +519,15 @@ def add_test(job_id):
 
     form = AddTestForm()
 
+    # Dynamically adjust the number of question entries for POST
+    if request.method == 'POST':
+        total_questions = 0
+        while f'questions-{total_questions}-question' in request.form:
+            total_questions += 1
+        form.questions.min_entries = total_questions
+        form.questions.entries = []  # Clear existing entries
+        form = AddTestForm()  # Re-initialize to reflect new min_entries
+
     if form.validate_on_submit():
         for question_form in form.questions:
             question = PreInterviewTest(
@@ -537,7 +546,6 @@ def add_test(job_id):
         return redirect(url_for('manage_jobs'))
 
     return render_template('add_test.html', form=form, job=job, UserRole=UserRole)
-
 
 
 @app.route("/resume", methods=["GET", "POST"])
