@@ -2,7 +2,7 @@
 {% block title %}Jobs - Newwave{% endblock %}
 {% block content %}
 <div class="container">
-  <h1 class="mb-4">Available Jobs</h1>
+  <h1 class="mb-4 text-center">Available Jobs</h1>
   <form method="GET" action="{{ url_for('jobs') }}" class="form-inline mb-4">
     <div class="form-group mr-2">
       <input type="text" name="search" class="form-control" placeholder="Search jobs or company" value="{{ search }}">
